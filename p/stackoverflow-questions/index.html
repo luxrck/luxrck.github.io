@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>StackOverflow Questions Collection</title>
     <link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Pacifico' />
     <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
@@ -26,18 +27,18 @@
         
     </div>
 </header>
-        <div class="sticky"><span>Content</span><nav id="toc"></nav></div>
-        <div class="article">
-            <div class="article-header">
-                <div class="article-tags">
-                    
-                        <a class="cat">python</a>
-                    
-                        <a class="cat">yield</a>
-                    
+        <div class="row">
+            <div class="article col-sm-9">
+                <div class="article-header">
+                    <div class="article-tags">
+                        
+                            <a class="cat">python</a>
+                        
+                            <a class="cat">yield</a>
+                        
+                    </div>
                 </div>
-            </div>
-            <article id="article" class="article-content"><h2>Q1: <a href="http://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do-in-python">What does the “yield” keyword do in Python?</a></h2>
+                <article id="article" class="article-content"><h2>Q1: <a href="http://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do-in-python">What does the “yield” keyword do in Python?</a></h2>
 <p>To understand what yield does, you must understand what generators are. And before generators come iterables.</p>
 <h3>Iterables</h3>
 <p>When you create a list, you can read its items one by one. Reading its items one by one is called iteration:</p>
@@ -231,18 +232,17 @@ $100
 <p>More about it in this article about how does the for loop work.</p>
 <hr>
 </article>
+            </div>
+            <div class="sticky col-sm-3 hidden-sm hidden-xs" role="complementary"><span>Content</span><nav id="toc" data-spy="affix" data-offset-top="200"></nav></div>
         </div>
         <footer class="footer">
     <div class="external-links">
         
         <a href="https://github.com/luxrck" class="external-link" title="github"><i class="fa fa-github"></i></a>
         
-        <a href="https://twitter.com/luxrck" class="external-link" title="twitter"><i class="fa fa-twitter"></i></a>
-        
-        <a href="https://https://steamcommunity.com/id/luxrck" class="external-link" title="steam"><i class="fa fa-steam"></i></a>
-        
     </div>
 </footer>
+    </div>
     </div>
 
     <script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -253,13 +253,11 @@ $100
 <script src="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.js"></script>
 
 <style>
+.affix {
+    top: 20px;
+}
+
 .sticky {
-    position: fixed !important;
-    top: 3.6em;
-    bottom: 3.6em;
-    width: 20rem;
-    right: 0;
-    z-index: 100;
     border-top: 0;
     line-height: 1.1;
     overflow: auto;
@@ -283,12 +281,11 @@ $100
 
 <script>
 $(function() {
-  var navSelector = '#toc';
-  var $myNav = $(navSelector);
-  Toc.init($myNav);
-  $('body').scrollspy({
-    target: navSelector
-  });
+  var s = '#toc';
+  var e = $(s);
+  Toc.init(e);
+  $('body').scrollspy({ target: s });
+  e.data("offsetTop", e.offset().top - 20);
 });
 </script>
 
