@@ -1,6 +1,7 @@
 <footer class="footer">
     <div class="external-links">
-        <a href="https://github.com/luxrck" class="external-link" title="github"><i class="fa fa-github"></i></a>
-        <a href="https://steamcommunity.com/id/luxrck" class="external-link" title="steam"><i class="fa fa-steam"></i></a>
+        {% for w, l in this.config.externals.items() %}
+        <a href="{{l}}" class="external-link" title="{{w}}"><i class="fa fa-{{w}}"></i></a>
+        {% endfor %}
     </div>
 </footer>

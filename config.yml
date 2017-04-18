@@ -2,3 +2,5 @@ articles_per_page: 10
 output: site
 summary: "fuck \u2192you \u2191you \u2197you \u2193you \u2199you and \u21A9 you"
 theme: default
+externals:
+  github: luxrck
