@@ -7,9 +7,6 @@ body {
 }
 
 .container {
-    width: 50%;
-    margin-left: auto;
-    margin-right: auto;
     color: #34495e;
 }
 
@@ -36,7 +33,7 @@ body {
     margin: 0px 4px;
 }
 
-.cat {
+.cat, .tag {
     cursor: pointer;
     position: relative;
     display: inline-block;
@@ -49,7 +46,7 @@ body {
     background: #eef4fa;
     border-radius: 100px;
 }
-.cat-selected {
+.cat-selected, .tag-selected {
     background: #ccc;
 }
 

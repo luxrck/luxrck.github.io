@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     {% block title %}<title>Homepage</title>{% endblock %}
     <link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Pacifico' />
     <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />

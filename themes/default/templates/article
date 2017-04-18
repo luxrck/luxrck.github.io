@@ -5,18 +5,21 @@
 {% block main %}
     <div class="container">
         {% include "_header" %}
-        <div class="sticky"><span>Content</span><nav id="toc"></nav></div>
-        <div class="article">
-            <div class="article-header">
-                <div class="article-tags">
-                    {% for tag in article.header.tags %}
-                        <a class="cat">{{ tag }}</a>
-                    {% endfor %}
+        <div class="row">
+            <div class="article col-sm-9">
+                <div class="article-header">
+                    <div class="article-tags">
+                        {% for tag in article.header.tags %}
+                            <a class="cat">{{ tag }}</a>
+                        {% endfor %}
+                    </div>
                 </div>
+                <article id="article" class="article-content">{{ article.html }}</article>
             </div>
-            <article id="article" class="article-content">{{ article.html }}</article>
+            <div class="sticky col-sm-3 hidden-sm hidden-xs" role="complementary"><span>Content</span><nav id="toc" data-spy="affix" data-offset-top="200"></nav></div>
         </div>
         {% include "_footer" %}
+    </div>
     </div>
 {% endblock %}
 
@@ -25,13 +28,11 @@
 <script src="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.js"></script>
 
 <style>
+.affix {
+    top: 20px;
+}
+
 .sticky {
-    position: fixed !important;
-    top: 3.6em;
-    bottom: 3.6em;
-    width: 20rem;
-    right: 0;
-    z-index: 100;
     border-top: 0;
     line-height: 1.1;
     overflow: auto;
@@ -55,12 +56,11 @@
 
 <script>
 $(function() {
-  var navSelector = '#toc';
-  var $myNav = $(navSelector);
-  Toc.init($myNav);
-  $('body').scrollspy({
-    target: navSelector
-  });
+  var s = '#toc';
+  var e = $(s);
+  Toc.init(e);
+  $('body').scrollspy({ target: s });
+  e.data("offsetTop", e.offset().top - 20);
 });
 </script>
 {% endblock %}
