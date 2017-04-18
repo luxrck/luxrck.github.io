@@ -65,18 +65,11 @@
                 <a class="cat" id="cat-all">all</a>
                 
                 
-                
-                
                     <a class="cat" id="cat-stackoverflow">stackoverflow</a>
                 
                 
             </div>
             <div class="archive-articles">
-            
-                <div class="archive-article cat-all cat-">
-                    <span class="archive-article-date">Apr 18, 2017</span>
-                    <span class="archive-article-title"><a href="/p/hello">hello</a></span>
-                </div>
             
                 <div class="archive-article cat-all cat-stackoverflow">
                     <span class="archive-article-date">Apr 18, 2017</span>
@@ -103,8 +96,8 @@ $(".cat").bind("click", function(e) {
         selected = $(".cat-selected");
     if (selected) selected.removeClass("cat-selected");
     $(e.target).addClass("cat-selected");
-    $(".tag-all").hide();
-    $(tag).show();
+    $(".cat-all").hide();
+    $(`.${cat}`).show();
 })
 </script>
 

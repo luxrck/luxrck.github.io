@@ -43,10 +43,10 @@
                 {% endfor %}
             </div>
             <div class="archive-articles">
-            {% for article in articles %}
-                <div class="archive-article cat-all cat-{{ article.header.category.replace(" ", "_") }}">
-                    <span class="archive-article-date">{{ article.header.date.strftime('%b %d, %Y') }}</span>
-                    <span class="archive-article-title"><a href="/p/{{ article.name }}">{{ article.header.title }}</a></span>
+            {% for a in articles %}
+                <div class="archive-article cat-all {{ "cat-" + a.header.category.replace(" ", "_") if a.header.category }}">
+                    <span class="archive-article-date">{{ a.header.date.strftime('%b %d, %Y') }}</span>
+                    <span class="archive-article-title"><a href="/p/{{ a.name }}">{{ a.header.title }}</a></span>
                 </div>
             {% endfor %}
             </div>
@@ -62,8 +62,8 @@ $(".cat").bind("click", function(e) {
         selected = $(".cat-selected");
     if (selected) selected.removeClass("cat-selected");
     $(e.target).addClass("cat-selected");
-    $(".tag-all").hide();
-    $(tag).show();
+    $(".cat-all").hide();
+    $(`.${cat}`).show();
 })
 </script>
 {% endblock %}

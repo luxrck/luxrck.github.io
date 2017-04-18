@@ -10,7 +10,7 @@
             <div class="article-header">
                 <div class="article-tags">
                     {% for tag in article.header.tags %}
-                        <a class="tag">{{ tag }}</a>
+                        <a class="cat">{{ tag }}</a>
                     {% endfor %}
                 </div>
             </div>
@@ -46,7 +46,7 @@
 }
 
 .article > * {
-    padding-bottom: 8px;
+    padding-top: 10px;
 }
 .article-date {
     color: #8a8a8a;
