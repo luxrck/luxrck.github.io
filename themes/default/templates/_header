@@ -1,0 +1,13 @@
+<header id="header" class="header">
+    <div class="header-info">
+        <a href="/" class="header-logo">Sagittaruis A*</a>
+        <span class="header-summary"><q>{{ this.config.summary }}</q></span>
+    </div>
+    <div class="header-nav">
+        {% if article is defined %}
+            <a href="/">Index</a>
+            <span class="fa fa-angle-right"></span>
+            <a href="/p/{{ article.name }}">{{ article.header.title }}</a>
+        {% endif %}
+    </div>
+</header>

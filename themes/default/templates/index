@@ -1,0 +1,69 @@
+{% extends "_base" %}
+
+{% block style %}
+<style>
+.summary {
+    text-align: center;
+    font-size: 10px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.archive > * {
+    padding-bottom: 8px;
+}
+.archive-article {
+    padding: 4px 8px;
+}
+.archive-article > * {
+    padding-right: 4px;
+}
+.archive-article:hover {
+    border-left: 3px solid #c05b4d;
+    transition: 0.2s ease-out;
+    transform: translateX(4px);
+}
+</style>
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        {% include "_header" %}
+        {% if this.index %}
+            <blockquote class="summary">{{ this.index }}</blockquote>
+        {% endif %}
+        <br/><br/>
+        <div class="archive">
+            <div class="archive-tags">
+                <a class="cat" id="cat-all">all</a>
+                {% for cat in categories|dictsort %}
+                {% if cat[0] != "" %}
+                    <a class="cat" id="cat-{{ cat[0].replace(" ", "_") }}">{{ cat[0] }}</a>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="archive-articles">
+            {% for article in articles %}
+                <div class="archive-article cat-all cat-{{ article.header.category.replace(" ", "_") }}">
+                    <span class="archive-article-date">{{ article.header.date.strftime('%b %d, %Y') }}</span>
+                    <span class="archive-article-title"><a href="/p/{{ article.name }}">{{ article.header.title }}</a></span>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+        {% include "_footer" %}
+{% endblock %}
+
+{% block script %}
+<script>
+$("#cat-all").addClass("cat-selected");
+$(".cat").bind("click", function(e) {
+    var cat = e.target.id,
+        selected = $(".cat-selected");
+    if (selected) selected.removeClass("cat-selected");
+    $(e.target).addClass("cat-selected");
+    $(".tag-all").hide();
+    $(tag).show();
+})
+</script>
+{% endblock %}

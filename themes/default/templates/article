@@ -1,0 +1,66 @@
+{% extends "_base" %}
+
+{% block title %}<title>{{ article.header.title }}</title>{% endblock %}
+
+{% block main %}
+    <div class="container">
+        {% include "_header" %}
+        <div class="sticky"><span>Content</span><nav id="toc"></nav></div>
+        <div class="article">
+            <div class="article-header">
+                <div class="article-tags">
+                    {% for tag in article.header.tags %}
+                        <a class="tag">{{ tag }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            <article id="article" class="article-content">{{ article.html }}</article>
+        </div>
+        {% include "_footer" %}
+    </div>
+{% endblock %}
+
+{% block script %}
+<link rel="stylesheet" type="text/css" href="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.css" />
+<script src="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.js"></script>
+
+<style>
+.sticky {
+    position: fixed !important;
+    top: 3.6em;
+    bottom: 3.6em;
+    width: 20rem;
+    right: 0;
+    z-index: 100;
+    border-top: 0;
+    line-height: 1.1;
+    overflow: auto;
+    box-shadow: -3px 4px 16px 0px rgba(0,0,0,0.1);
+}
+.sticky span {
+    display: block;
+    text-align: center;
+}
+.sticky > * {
+    padding: 8px;
+}
+
+.article > * {
+    padding-bottom: 8px;
+}
+.article-date {
+    color: #8a8a8a;
+}
+</style>
+
+<script>
+$(function() {
+  var navSelector = '#toc';
+  var $myNav = $(navSelector);
+  Toc.init($myNav);
+  $('body').scrollspy({
+    target: navSelector
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,62 @@
+a, a:hover, a:active, a:visited, a:focus, a:link {
+    text-decoration: none;
+}
+
+.container {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    color: #34495e;
+}
+
+.header > * {
+    padding-top: 36px;
+}
+.header-info {
+    overflow: hidden;
+    height: 96px;
+}
+.header-logo {
+    font-size: 36px;
+    font-family: "Pacifico", cursive, sans-serif;
+    float: left;
+    color: #337ab7;
+}
+.header-summary {
+    float: right;
+}
+.header-nav {
+    height: 56px;
+}
+.header-nav > * {
+    margin: 0px 4px;
+}
+
+.cat {
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    height: 30px;
+    padding: 0 12px;
+    font-size: 14px;
+    line-height: 30px;
+    color: #3e7ac2;
+    vertical-align: top;
+    background: #eef4fa;
+    border-radius: 100px;
+}
+.cat-selected {
+    background: #ccc;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 36px;
+}
+.footer .external-link {
+    color: #3e3e3e;
+    font-size: 32px;
+}
+.footer .external-link > * {
+    margin: 0px 2px;
+}
