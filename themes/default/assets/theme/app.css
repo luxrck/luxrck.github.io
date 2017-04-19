@@ -4,6 +4,7 @@ a, a:hover, a:active, a:visited, a:focus, a:link {
 
 body {
     overflow-y: scroll;
+    position: relative;
 }
 
 .container {

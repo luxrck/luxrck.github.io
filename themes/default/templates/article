@@ -16,7 +16,7 @@
             </div>
             <article id="article" class="article-content">{{ article.html }}</article>
         </div>
-        <div class="col-sm-3"><nav id="toc" class="hidden-xs" data-spy="affix"></nav></div>
+        <div class="col-sm-3"><nav id="toc" class="hidden-xs affix-top" data-spy="affix" data-offset-top="150"></nav></div>
     </div>
     {% include "_footer" %}
 </div>
@@ -27,13 +27,14 @@
 <script src="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.js"></script>
 
 <style>
-.affix {
-  top: 0px;
-  bottom: 90px;
-}
 #toc {
-  width: 220px;
-  overflow-y: auto;
+    width: 220px;
+    overflow-y: auto;
+    top: 20px;
+    bottom: 90px;
+}
+nav {
+    position: static;
 }
 
 .article > * {
@@ -52,11 +53,14 @@ $(function() {
   $('body').scrollspy({
     target: navSelector
     });
-  $myNav.affix({
-    offset: {
-      top: $myNav.offset().top,
-      }
-    });
+
+  // FIXME: this won't working on android chrome, why ?
+  //$myNav.affix({
+  //  offset: {
+  //    top: 150,
+  //    }
+  //  });
+
   $(window).on("scroll", function(e) {
     var e = $("#toc li.active").get(0);
     if (e) {
