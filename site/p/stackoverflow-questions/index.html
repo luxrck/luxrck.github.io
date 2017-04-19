@@ -3,18 +3,24 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>StackOverflow Questions Collection</title>
+    <script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+
     <link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Pacifico' />
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/solarized-dark.min.css" />
+    <script src="/assets/theme/highlight.pack.js"></script>
+
     <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
     <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/solarized-dark.min.css" />
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
     <link rel="stylesheet" type="text/css" href="/assets/theme/app.css" />
-    <script src="/assets/theme/highlight.pack.js"></script>
     
 </head>
 <body>
     
-    <div class="container">
-        <header id="header" class="header">
+<div class="container">
+    <header id="header" class="header">
     <div class="header-info">
         <a href="/" class="header-logo">Sagittaruis A*</a>
         <span class="header-summary"><q>fuck →you ↑you ↗you ↓you ↙you and ↩ you</q></span>
@@ -27,18 +33,18 @@
         
     </div>
 </header>
-        <div class="row">
-            <div class="article col-sm-9">
-                <div class="article-header">
-                    <div class="article-tags">
-                        
-                            <a class="cat">python</a>
-                        
-                            <a class="cat">yield</a>
-                        
-                    </div>
+    <div class="row">
+        <div class="article col-sm-9">
+            <div class="article-header">
+                <div class="article-tags">
+                    
+                        <a class="cat">python</a>
+                    
+                        <a class="cat">yield</a>
+                    
                 </div>
-                <article id="article" class="article-content"><h2>Q1: <a href="http://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do-in-python">What does the “yield” keyword do in Python?</a></h2>
+            </div>
+            <article id="article" class="article-content"><h2>Q1: <a href="http://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do-in-python">What does the “yield” keyword do in Python?</a></h2>
 <p>To understand what yield does, you must understand what generators are. And before generators come iterables.</p>
 <h3>Iterables</h3>
 <p>When you create a list, you can read its items one by one. Reading its items one by one is called iteration:</p>
@@ -232,21 +238,18 @@ $100
 <p>More about it in this article about how does the for loop work.</p>
 <hr>
 </article>
-            </div>
-            <div class="sticky col-sm-3 hidden-sm hidden-xs" role="complementary"><span>Content</span><nav id="toc" data-spy="affix" data-offset-top="200"></nav></div>
         </div>
-        <footer class="footer">
+        <div class="col-sm-3"><nav id="toc" class="hidden-xs" data-spy="affix"></nav></div>
+    </div>
+    <footer class="footer">
     <div class="external-links">
         
         <a href="https://github.com/luxrck" class="external-link" title="github"><i class="fa fa-github"></i></a>
         
     </div>
 </footer>
-    </div>
-    </div>
+</div>
 
-    <script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     
 <link rel="stylesheet" type="text/css" href="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.css" />
@@ -254,21 +257,12 @@ $100
 
 <style>
 .affix {
-    top: 20px;
+  top: 0px;
+  bottom: 90px;
 }
-
-.sticky {
-    border-top: 0;
-    line-height: 1.1;
-    overflow: auto;
-    box-shadow: -3px 4px 16px 0px rgba(0,0,0,0.1);
-}
-.sticky span {
-    display: block;
-    text-align: center;
-}
-.sticky > * {
-    padding: 8px;
+#toc {
+  width: 220px;
+  overflow-y: auto;
 }
 
 .article > * {
@@ -281,11 +275,23 @@ $100
 
 <script>
 $(function() {
-  var s = '#toc';
-  var e = $(s);
-  Toc.init(e);
-  $('body').scrollspy({ target: s });
-  e.data("offsetTop", e.offset().top - 20);
+  var navSelector = '#toc';
+  var $myNav = $(navSelector);
+  Toc.init($myNav);
+  $('body').scrollspy({
+    target: navSelector
+    });
+  $myNav.affix({
+    offset: {
+      top: $myNav.offset().top,
+      }
+    });
+  $(window).on("scroll", function(e) {
+    var e = $("#toc li.active").get(0);
+    if (e) {
+      e.scrollIntoView(false);
+    }
+    });
 });
 </script>
 
