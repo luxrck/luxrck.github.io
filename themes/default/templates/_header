@@ -1,13 +1,13 @@
 <header id="header" class="header">
-    <div class="header-info">
-        <a href="/" class="header-logo">Sagittaruis A*</a>
-        <q class="header-summary col-sm-5 col-xs-10">{{ this.config.summary }}</q>
-    </div>
-    <div class="header-nav">
-        {% if article is defined %}
-            <a href="/">Index</a>
-            <span class="fa fa-angle-right"></span>
-            <a href="/p/{{ article.name }}">{{ article.header.title }}</a>
-        {% endif %}
-    </div>
+  <div class="header-info">
+    <a href="/" class="header-logo">Sagittaruis A*</a>
+    <q class="header-summary col-sm-5 col-xs-10">{{ this.config.summary }}</q>
+  </div>
+  <div class="header-nav">
+  {% if article is defined %}
+    <a href="/">Index</a>
+    <span class="fa fa-angle-right"></span>
+    <a href="/p/{{ article.name }}">{{ article.header.title }}</a>
+  {% endif %}
+  </div>
 </header>

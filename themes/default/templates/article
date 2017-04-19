@@ -4,21 +4,21 @@
 
 {% block main %}
 <div class="container">
-    {% include "_header" %}
-    <div class="row">
-        <div class="article col-sm-9">
-            <div class="article-header">
-                <div class="article-tags">
-                    {% for tag in article.header.tags %}
-                        <a class="cat">{{ tag }}</a>
-                    {% endfor %}
-                </div>
-            </div>
-            <article id="article" class="article-content">{{ article.html }}</article>
+  {% include "_header" %}
+  <div class="row">
+    <div class="article col-sm-9">
+      <div class="article-header">
+        <div class="article-tags">
+        {% for tag in article.header.tags %}
+          <a class="cat">{{ tag }}</a>
+        {% endfor %}
         </div>
-        <div class="col-sm-3"><nav id="toc" class="hidden-xs affix-top" data-spy="affix" data-offset-top="150"></nav></div>
+      </div>
+      <article id="article" class="article-content">{{ article.html }}</article>
     </div>
-    {% include "_footer" %}
+    <div class="col-sm-3"><nav id="toc" class="hidden-xs affix-top" data-spy="affix" data-offset-top="150"></nav></div>
+  </div>
+  {% include "_footer" %}
 </div>
 {% endblock %}
 

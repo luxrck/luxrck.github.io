@@ -1,6 +1,37 @@
 {% extends "_base" %}
 
-{% block style %}
+{% block title %}<title>{{ this.config.home }}</title>{% endblock %}
+
+{% block main %}
+<div class="container">
+  {% include "_header" %}
+  {% if this.index %}
+    <blockquote class="summary">{{ this.index }}</blockquote>
+  {% endif %}
+  <br/><br/>
+  <div class="archive">
+    <div class="archive-tags">
+      <a class="cat" id="cat-all">all</a>
+      {% for cat in categories|dictsort %}
+      {% if cat[0] != "" %}
+        <a class="cat" id="cat-{{ cat[0].replace(" ", "_") }}">{{ cat[0] }}</a>
+      {% endif %}
+      {% endfor %}
+    </div>
+    <div class="archive-articles">
+    {% for a in articles %}
+      <div class="archive-article cat-all {{ "cat-" + a.header.category.replace(" ", "_") if a.header.category }}">
+        <span class="archive-article-date">{{ a.header.date.strftime('%b %d, %Y') }}</span>
+        <span class="archive-article-title"><a href="/p/{{ a.name }}">{{ a.header.title }}</a></span>
+      </div>
+    {% endfor %}
+    </div>
+  </div>
+  {% include "_footer" %}
+</div>
+{% endblock %}
+
+{% block script %}
 <style>
 .summary {
     text-align: center;
@@ -24,37 +55,7 @@
     transform: translateX(4px);
 }
 </style>
-{% endblock %}
 
-{% block main %}
-    <div class="container">
-        {% include "_header" %}
-        {% if this.index %}
-            <blockquote class="summary">{{ this.index }}</blockquote>
-        {% endif %}
-        <br/><br/>
-        <div class="archive">
-            <div class="archive-tags">
-                <a class="cat" id="cat-all">all</a>
-                {% for cat in categories|dictsort %}
-                {% if cat[0] != "" %}
-                    <a class="cat" id="cat-{{ cat[0].replace(" ", "_") }}">{{ cat[0] }}</a>
-                {% endif %}
-                {% endfor %}
-            </div>
-            <div class="archive-articles">
-            {% for a in articles %}
-                <div class="archive-article cat-all {{ "cat-" + a.header.category.replace(" ", "_") if a.header.category }}">
-                    <span class="archive-article-date">{{ a.header.date.strftime('%b %d, %Y') }}</span>
-                    <span class="archive-article-title"><a href="/p/{{ a.name }}">{{ a.header.title }}</a></span>
-                </div>
-            {% endfor %}
-            </div>
-        </div>
-        {% include "_footer" %}
-{% endblock %}
-
-{% block script %}
 <script>
 $("#cat-all").addClass("cat-selected");
 $(".cat").bind("click", function(e) {
