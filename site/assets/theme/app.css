@@ -14,8 +14,11 @@ body {
     padding-top: 36px;
 }
 .header-info {
-    overflow: hidden;
-    height: 96px;
+    display: inline-block;
+    width: 100%;
+}
+.header-info > * {
+    padding: 12px 0px;
 }
 .header-logo {
     font-size: 36px;
@@ -25,6 +28,8 @@ body {
 }
 .header-summary {
     float: right;
+    font-family: "Commic Sans MS";
+    text-align: right;
 }
 .header-nav {
     height: 56px;
