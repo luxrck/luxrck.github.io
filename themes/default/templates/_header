@@ -1,7 +1,9 @@
 <header id="header" class="header">
   <div class="header-info">
     <a href="/" class="header-logo">Sagittaruis A*</a>
+    {% if this.config.summary %}
     <q class="header-summary col-sm-5 col-xs-10">{{ this.config.summary }}</q>
+    {% endif %}
   </div>
   <div class="header-nav">
   {% if article is defined %}

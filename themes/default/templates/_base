@@ -18,8 +18,17 @@
     <link rel="stylesheet" type="text/css" href="/assets/theme/app.css" />
 </head>
 <body>
-    {% block main %}{% endblock %}
-    <script>hljs.initHighlightingOnLoad();</script>
-    {% block script %}{% endblock %}
+  {% block main %}{% endblock %}
+  <script>
+  hljs.initHighlightingOnLoad();
+
+  var categories = {{ categories|tojson|safe }};
+  var tags = {{ tags|tojson|safe }};
+
+  var tag = {{ tag|tojson|safe if tag else "undefined" }};
+  var category = {{ category|tojson|safe if category else "undefined" }};
+  var article  = {{ article.name|tojson|safe if article else "undefined" }};
+  </script>
+  {% block script %}{% endblock %}
 </body>
 </html>

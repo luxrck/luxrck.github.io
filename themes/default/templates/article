@@ -28,20 +28,20 @@
 
 <style>
 #toc {
-    width: 220px;
-    overflow-y: auto;
-    top: 20px;
-    bottom: 90px;
+  width: 220px;
+  overflow-y: auto;
+  top: 20px;
+  bottom: 90px;
 }
 nav {
-    position: static;
+  position: static;
 }
 
 .article > * {
-    padding-top: 10px;
+  padding-top: 10px;
 }
 .article-date {
-    color: #8a8a8a;
+  color: #8a8a8a;
 }
 </style>
 

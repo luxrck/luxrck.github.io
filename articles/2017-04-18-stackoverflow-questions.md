@@ -1,7 +1,7 @@
 ---
 title: StackOverflow Questions Collection
 date: 2017-04-18 13:42
-category: stackoverflow
+category: 
 tags: python, yield
 ---
 

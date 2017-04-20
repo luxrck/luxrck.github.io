@@ -4,67 +4,78 @@
 
 {% block main %}
 <div class="container">
+
   {% include "_header" %}
+
   {% if this.index %}
     <blockquote class="summary">{{ this.index }}</blockquote>
   {% endif %}
+
   <br/><br/>
+
   <div class="archive">
-    <div class="archive-tags">
-      <a class="cat" id="cat-all">all</a>
-      {% for cat in categories|dictsort %}
-      {% if cat[0] != "" %}
-        <a class="cat" id="cat-{{ cat[0].replace(" ", "_") }}">{{ cat[0] }}</a>
-      {% endif %}
+
+    <div class="archive-cats">
+      <a class="cat" id="cat-{{ categories.name }}">{{ categories.name }}</a>
+      {% for sub in categories.sub %}
+      <a class="cat" id="cat-{{ sub.name.replace(" ", "_") }}">{{ sub.name }}</a>
       {% endfor %}
     </div>
+
     <div class="archive-articles">
     {% for a in articles %}
-      <div class="archive-article cat-all {{ "cat-" + a.header.category.replace(" ", "_") if a.header.category }}">
+      <div class="archive-article
+        {% for c in a.header.categories %}
+        {{ "cat-" + c.name.replace(" ", "_") }}
+        {% endfor %}">
         <span class="archive-article-date">{{ a.header.date.strftime('%b %d, %Y') }}</span>
         <span class="archive-article-title"><a href="/p/{{ a.name }}">{{ a.header.title }}</a></span>
       </div>
     {% endfor %}
     </div>
+
   </div>
+
   {% include "_footer" %}
+
 </div>
 {% endblock %}
 
 {% block script %}
 <style>
 .summary {
-    text-align: center;
-    font-size: 10px;
-    margin-left: auto;
-    margin-right: auto;
+  text-align: center;
+  font-size: 10px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .archive > * {
-    padding-bottom: 8px;
+  padding-bottom: 16px;
 }
 .archive-article {
-    padding: 4px 8px;
+  padding: 4px 8px;
+  font-size: 18px;
 }
 .archive-article > * {
-    padding-right: 4px;
+  padding-right: 12px;
 }
 .archive-article:hover {
-    border-left: 3px solid #c05b4d;
-    transition: 0.2s ease-out;
-    transform: translateX(4px);
+  border-left: 3px solid #c05b4d;
+  transition: 0.2s ease-out;
+  transform: translateX(4px);
 }
 </style>
 
 <script>
 $("#cat-all").addClass("cat-selected");
 $(".cat").bind("click", function(e) {
-    var cat = e.target.id,
-        selected = $(".cat-selected");
-    if (selected) selected.removeClass("cat-selected");
-    $(e.target).addClass("cat-selected");
-    $(".cat-all").hide();
-    $(`.${cat}`).show();
+  var cat = e.target.id,
+    selected = $(".cat-selected");
+  if (selected) selected.removeClass("cat-selected");
+  $(e.target).addClass("cat-selected");
+  $(".cat-all").hide();
+  $(`.${cat}`).show();
 })
 </script>
 {% endblock %}
