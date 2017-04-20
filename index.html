@@ -18,17 +18,21 @@
     <link rel="stylesheet" type="text/css" href="/assets/theme/app.css" />
 </head>
 <body>
-    
+  
 <div class="container">
+
   <header id="header" class="header">
   <div class="header-info">
     <a href="/" class="header-logo">Sagittaruis A*</a>
+    
     <q class="header-summary col-sm-5 col-xs-10">fuck →you ↑you ↗you ↓you ↙you and ↩ you</q>
+    
   </div>
   <div class="header-nav">
   
   </div>
 </header>
+
   
     <blockquote class="summary"><h3><a href="http://scp-wiki-cn.wikidot.com/10-30-a-m">10:30 A.M.</a></h3>
 <p>好了，大家，现在，都给我坐下，然后闭上你们的臭嘴。我还有别的地方要去，去见一些比你们更重要的人。你能坐在这里的折叠椅上，这就意味着你成为了新成员。这里最底层的人。但是，这也意味着你已经通过了测试。欢迎来到SPC。从现在开始，你的工作是非常，非常简单的：你将要打鲨鱼。</p>
@@ -42,25 +46,30 @@
 <p>我一拳打在他的脸上！因为他已经是一条潜在的鲨鱼了。因为这正是我们TMD在SPC中该做的事。</p>
 </blockquote>
   
+
   <br/><br/>
+
   <div class="archive">
-    <div class="archive-tags">
+
+    <div class="archive-cats">
       <a class="cat" id="cat-all">all</a>
       
-      
-        <a class="cat" id="cat-stackoverflow">stackoverflow</a>
-      
-      
     </div>
+
     <div class="archive-articles">
     
-      <div class="archive-article cat-all cat-stackoverflow">
+      <div class="archive-article
+        
+        cat-all
+        ">
         <span class="archive-article-date">Apr 18, 2017</span>
         <span class="archive-article-title"><a href="/p/stackoverflow-questions">StackOverflow Questions Collection</a></span>
       </div>
     
     </div>
+
   </div>
+
   <footer class="footer">
   <div class="external-links">
   
@@ -68,43 +77,54 @@
   
   </div>
 </footer>
+
 </div>
 
-    <script>hljs.initHighlightingOnLoad();</script>
-    
+  <script>
+  hljs.initHighlightingOnLoad();
+
+  var categories = {"name": "all", "rank": 1, "sub": []};
+  var tags = [{"name": "python", "rank": 1}, {"name": "yield", "rank": 1}];
+
+  var tag = undefined;
+  var category = undefined;
+  var article  = undefined;
+  </script>
+  
 <style>
 .summary {
-    text-align: center;
-    font-size: 10px;
-    margin-left: auto;
-    margin-right: auto;
+  text-align: center;
+  font-size: 10px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .archive > * {
-    padding-bottom: 8px;
+  padding-bottom: 16px;
 }
 .archive-article {
-    padding: 4px 8px;
+  padding: 4px 8px;
+  font-size: 18px;
 }
 .archive-article > * {
-    padding-right: 4px;
+  padding-right: 12px;
 }
 .archive-article:hover {
-    border-left: 3px solid #c05b4d;
-    transition: 0.2s ease-out;
-    transform: translateX(4px);
+  border-left: 3px solid #c05b4d;
+  transition: 0.2s ease-out;
+  transform: translateX(4px);
 }
 </style>
 
 <script>
 $("#cat-all").addClass("cat-selected");
 $(".cat").bind("click", function(e) {
-    var cat = e.target.id,
-        selected = $(".cat-selected");
-    if (selected) selected.removeClass("cat-selected");
-    $(e.target).addClass("cat-selected");
-    $(".cat-all").hide();
-    $(`.${cat}`).show();
+  var cat = e.target.id,
+    selected = $(".cat-selected");
+  if (selected) selected.removeClass("cat-selected");
+  $(e.target).addClass("cat-selected");
+  $(".cat-all").hide();
+  $(`.${cat}`).show();
 })
 </script>
 
