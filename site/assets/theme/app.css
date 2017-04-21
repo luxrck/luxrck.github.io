@@ -1,31 +1,52 @@
+/*
+About CSS Comments:
+https://www.w3.org/TR/CSS21/syndata.html#comments
+
+In some cases, user agents must ignore part of an illegal style sheet.
+This specification defines ignore to mean that the user agent parses the
+illegal part (in order to find its beginning and end), but otherwise acts
+as if it had not been there.
+*/
+
+
 a, a:hover, a:active, a:visited, a:focus, a:link {
     text-decoration: none;
 }
-
 html, body {
   max-height: 100%;
   height: 100%;
 }
-
 body {
-    overflow-y: scroll;
-    position: relative;
+    color: #4a4a4a;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
 }
+body, button, input, select, textarea {
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+html {
+  background-color: #fff;
+  font-size: 16px;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  min-width: 300px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  text-rendering: optimizeLegibility;
+}
+pre {
+  padding: 0px;
+}
+
 
 .container {
     color: #34495e;
+    /*padding: 0px;*/
+    /*height: 100%;*/
 }
 
-.header > * {
-    padding-top: 36px;
-}
-.header-info {
-    display: inline-block;
-    width: 100%;
-}
-.header-info > * {
-    padding: 12px 0px;
-}
+
 .header-logo {
     font-size: 36px;
     font-family: "Pacifico", cursive, sans-serif;
@@ -34,15 +55,13 @@ body {
 }
 .header-summary {
     float: right;
-    font-family: "Commic Sans MS";
+    font-family: "Orbitron";
     text-align: right;
-}
-.header-nav {
-    height: 56px;
 }
 .header-nav > * {
     margin: 0px 4px;
 }
+
 
 .cat, .tag {
     cursor: pointer;
@@ -58,12 +77,13 @@ body {
     border-radius: 100px;
 }
 .cat-selected, .tag-selected {
-    background: #ccc;
+    background: #dadada;
 }
+
 
 .footer {
     text-align: center;
-    margin-top: 36px;
+    /*margin-top: 36px;*/
 }
 .footer .external-link {
     color: #3e3e3e;

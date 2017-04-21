@@ -1,25 +1,22 @@
-{% extends "_base" %}
+{% extends "_hg" %}
 
 {% block title %}<title>{{ article.header.title }}</title>{% endblock %}
 
 {% block main %}
-<div class="container">
-  {% include "_header" %}
-  <div class="row">
-    <div class="article col-sm-9">
-      <div class="article-header">
-        <div class="article-tags">
-        {% for tag in article.header.tags %}
-          <a class="cat">{{ tag }}</a>
-        {% endfor %}
-        </div>
+<!-- <div class="main"> -->
+  <div class="article content">
+    <div class="article-header">
+      <div class="article-tags">
+      {% for tag in article.header.tags %}
+        <a class="cat">{{ tag }}</a>
+      {% endfor %}
       </div>
-      <article id="article" class="article-content">{{ article.html }}</article>
     </div>
-    <div class="col-sm-3"><nav id="toc" class="hidden-xs affix-top" data-spy="affix" data-offset-top="150"></nav></div>
+    <article id="article" class="article-content">{{ article.html }}</article>
   </div>
-  {% include "_footer" %}
-</div>
+
+  <div class="side"><nav id="toc"></nav></div>
+<!-- </div> -->
 {% endblock %}
 
 {% block script %}
@@ -27,21 +24,8 @@
 <script src="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.js"></script>
 
 <style>
-#toc {
-  width: 220px;
-  overflow-y: auto;
-  top: 20px;
-  bottom: 90px;
-}
-nav {
-  position: static;
-}
-
-.article > * {
-  padding-top: 10px;
-}
-.article-date {
-  color: #8a8a8a;
+.affix {
+  top: 0px;
 }
 </style>
 
@@ -55,18 +39,18 @@ $(function() {
     });
 
   // FIXME: this won't working on android chrome, why ?
-  //$myNav.affix({
-  //  offset: {
-  //    top: 150,
-  //    }
-  //  });
+  $myNav.affix({
+   offset: {
+     top: $myNav.offset().top,
+     }
+   });
 
-  $(window).on("scroll", function(e) {
-    var e = $("#toc li.active").get(0);
-    if (e) {
-      e.scrollIntoView(false);
-    }
-    });
+  // $(window).on("scroll", function(e) {
+  //   var e = $("#toc li.active").get(0);
+  //   if (e) {
+  //     e.scrollIntoView(false);
+  //   }
+  //   });
 });
 </script>
 {% endblock %}

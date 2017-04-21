@@ -2,25 +2,70 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>StackOverflow Questions Collection</title>
     <script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 
     <link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Pacifico' />
+    <link rel='stylesheet' type='text/css' href="https://fonts.googleapis.com/css?family=Orbitron" />
 
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/solarized-dark.min.css" />
     <script src="/assets/theme/highlight.pack.js"></script>
 
-    <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
     <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
-    <link rel="stylesheet" type="text/css" href="/assets/theme/app.css" />
 </head>
 <body>
   
+<style>
+.main {
+  grid-area: main;
+  display: grid;
+  grid: 1fr 1fr 1fr 1fr / auto;
+  grid-template-areas: "content content content side";
+}
+.header {
+  grid-area: header;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+.content {
+  grid-area: content;
+}
+.side {
+  grid-area: side;
+}
+.footer {
+  grid-area: footer;
+}
+.grid-layout {
+  width: 100%;
+  /*height: 100%;*/
+  display: grid;
+  grid: 168px 1fr 64px / 1fr 1fr 1fr 1fr;
+  grid-template-areas:  "header header header header"
+                        "content content content side"
+                        "footer footer footer footer";
+  grid-gap: 1em 1em;
+}
+
+@media screen and (max-width: 755px) {
+  .grid-layout {
+      grid-template-columns: 100%;
+      grid-template-areas: "header"
+                           "content"
+                           "footer";
+  }
+  .side {
+    display: none;
+  }
+}
+</style>
 <div class="container">
-  <header id="header" class="header">
+  <div class="grid-layout">
+    <header id="header" class="header">
   <div class="header-info">
     <a href="/" class="header-logo">Sagittaruis A*</a>
     
@@ -35,18 +80,19 @@
   
   </div>
 </header>
-  <div class="row">
-    <div class="article col-sm-9">
-      <div class="article-header">
-        <div class="article-tags">
-        
-          <a class="cat">python</a>
-        
-          <a class="cat">yield</a>
-        
-        </div>
+    
+<!-- <div class="main"> -->
+  <div class="article content">
+    <div class="article-header">
+      <div class="article-tags">
+      
+        <a class="cat">python</a>
+      
+        <a class="cat">yield</a>
+      
       </div>
-      <article id="article" class="article-content"><h2>Q1: <a href="http://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do-in-python">What does the “yield” keyword do in Python?</a></h2>
+    </div>
+    <article id="article" class="article-content"><h2>Q1: <a href="http://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do-in-python">What does the “yield” keyword do in Python?</a></h2>
 <p>To understand what yield does, you must understand what generators are. And before generators come iterables.</p>
 <h3>Iterables</h3>
 <p>When you create a list, you can read its items one by one. Reading its items one by one is called iteration:</p>
@@ -240,18 +286,22 @@ $100
 <p>More about it in this article about how does the for loop work.</p>
 <hr>
 </article>
-    </div>
-    <div class="col-sm-3"><nav id="toc" class="hidden-xs affix-top" data-spy="affix" data-offset-top="150"></nav></div>
   </div>
-  <footer class="footer">
+
+  <div class="side"><nav id="toc"></nav></div>
+<!-- </div> -->
+
+    <footer class="footer">
   <div class="external-links">
   
     <a href="https://github.com/luxrck" class="external-link" title="github"><i class="fa fa-github"></i></a>
   
   </div>
 </footer>
+  </div>
 </div>
 
+  <link rel="stylesheet" type="text/css" href="/assets/theme/app.css" />
   <script>
   hljs.initHighlightingOnLoad();
 
@@ -267,21 +317,8 @@ $100
 <script src="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.js"></script>
 
 <style>
-#toc {
-  width: 220px;
-  overflow-y: auto;
-  top: 20px;
-  bottom: 90px;
-}
-nav {
-  position: static;
-}
-
-.article > * {
-  padding-top: 10px;
-}
-.article-date {
-  color: #8a8a8a;
+.affix {
+  top: 0px;
 }
 </style>
 
@@ -295,18 +332,18 @@ $(function() {
     });
 
   // FIXME: this won't working on android chrome, why ?
-  //$myNav.affix({
-  //  offset: {
-  //    top: 150,
-  //    }
-  //  });
+  $myNav.affix({
+   offset: {
+     top: $myNav.offset().top,
+     }
+   });
 
-  $(window).on("scroll", function(e) {
-    var e = $("#toc li.active").get(0);
-    if (e) {
-      e.scrollIntoView(false);
-    }
-    });
+  // $(window).on("scroll", function(e) {
+  //   var e = $("#toc li.active").get(0);
+  //   if (e) {
+  //     e.scrollIntoView(false);
+  //   }
+  //   });
 });
 </script>
 

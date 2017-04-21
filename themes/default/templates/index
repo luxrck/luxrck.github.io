@@ -1,45 +1,43 @@
-{% extends "_base" %}
+{% extends "_hg" %}
 
 {% block title %}<title>{{ this.config.home }}</title>{% endblock %}
 
 {% block main %}
-<div class="container">
+<!-- <div class="main"> -->
+  <div class="content">
+    {% if this.index %}
+      <blockquote class="summary">{{ this.index }}</blockquote>
+    {% endif %}
 
-  {% include "_header" %}
+    <br/><br/>
 
-  {% if this.index %}
-    <blockquote class="summary">{{ this.index }}</blockquote>
-  {% endif %}
-
-  <br/><br/>
-
-  <div class="archive">
-
-    <div class="archive-cats">
-      <a class="cat" id="cat-{{ categories.name }}">{{ categories.name }}</a>
-      {% for sub in categories.sub %}
-      <a class="cat" id="cat-{{ sub.name.replace(" ", "_") }}">{{ sub.name }}</a>
-      {% endfor %}
-    </div>
-
-    <div class="archive-articles">
-    {% for a in articles %}
-      <div class="archive-article
-        {% for c in a.header.categories %}
-        {{ "cat-" + c.name.replace(" ", "_") }}
-        {% endfor %}">
-        <span class="archive-article-date">{{ a.header.date.strftime('%b %d, %Y') }}</span>
-        <span class="archive-article-title"><a href="/p/{{ a.name }}">{{ a.header.title }}</a></span>
+    <div class="archive">
+      <div class="archive-cats">
+        <a class="cat" id="cat-{{ categories.name }}">{{ categories.name }}</a>
+        {% for sub in categories.sub %}
+        <a class="cat" id="cat-{{ sub.name.replace(" ", "_") }}">{{ sub.name }}</a>
+        {% endfor %}
       </div>
-    {% endfor %}
-    </div>
 
+      <div class="archive-articles">
+      {% for a in articles %}
+        <div class="archive-article
+          {% for c in a.header.categories %}
+          {{ "cat-" + c.name.replace(" ", "_") }}
+          {% endfor %}">
+          <span class="archive-article-date">{{ a.header.date.strftime('%b %d, %Y') }}</span>
+          <span class="archive-article-title"><a href="/p/{{ a.name }}">{{ a.header.title }}</a></span>
+        </div>
+      {% endfor %}
+      </div>
+    </div>
   </div>
 
-  {% include "_footer" %}
+  <!-- <div class="side"></div> -->
 
-</div>
+<!-- </div> -->
 {% endblock %}
+
 
 {% block script %}
 <style>
@@ -55,7 +53,7 @@
 }
 .archive-article {
   padding: 4px 8px;
-  font-size: 18px;
+  font-size: 0.85em;
 }
 .archive-article > * {
   padding-right: 12px;
