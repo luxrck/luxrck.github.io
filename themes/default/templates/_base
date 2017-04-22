@@ -27,7 +27,7 @@
 
   var tag = {{ tag|tojson|safe if tag else "undefined" }};
   var category = {{ category|tojson|safe if category else "undefined" }};
-  var article  = {{ article.name|tojson|safe if article else "undefined" }};
+  var article  = {{ article.summary()|tojson|safe if article else "undefined" }};
   </script>
   {% block script %}{% endblock %}
 </body>

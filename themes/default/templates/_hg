@@ -36,7 +36,7 @@
   grid-gap: 1em 1em;
 }
 
-@media screen and (max-width: 755px) {
+@media screen and (max-width: 800px) {
   .grid-layout {
       grid-template-columns: 100%;
       grid-template-areas: "header"

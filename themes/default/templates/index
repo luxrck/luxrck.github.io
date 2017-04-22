@@ -23,7 +23,7 @@
       {% for a in articles %}
         <div class="archive-article
           {% for c in a.header.categories %}
-          {{ "cat-" + c.name.replace(" ", "_") }}
+          {{ "cat-" + c.replace(" ", "_") }}
           {% endfor %}">
           <span class="archive-article-date">{{ a.header.date.strftime('%b %d, %Y') }}</span>
           <span class="archive-article-title"><a href="/p/{{ a.name }}">{{ a.header.title }}</a></span>
@@ -33,13 +33,24 @@
     </div>
   </div>
 
-  <!-- <div class="side"></div> -->
+  <div class="side">
+    <h4>Random</h4>
+    <div class="random-articles"></div>
+  </div>
 
 <!-- </div> -->
 {% endblock %}
 
 
 {% block script %}
+<script>
+var articles = [
+  {% for a in articles %}
+    {{ a.summary()|tojson|safe }},
+  {% endfor %}
+]
+</script>
+
 <style>
 .summary {
   text-align: center;
@@ -63,10 +74,41 @@
   transition: 0.2s ease-out;
   transform: translateX(4px);
 }
+
+.side > h4 {
+  padding: 0px 2em;
+}
 </style>
 
 <script>
-$("#cat-all").addClass("cat-selected");
+var randint = function(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+};
+
+var randomarticles = function(s) {
+  if (!articles.length) return;
+  var container = $(".random-articles"),
+      count = Math.min(5, articles.length),
+      indexes = [],
+      e = $(s), i = 0;
+  while (i < count) {
+    var r = randint(0, articles.length-1);
+    if (indexes.indexOf(r) != -1) continue;
+    indexes.push(r);
+    i++;
+  }
+  for (var i in indexes) {
+    var a = articles[indexes[i]];
+    var c = $.parseHTML(`<div class="archive-article"><span class="archive-article-title"><a href="/p/${a.name}">${a.title }</a></span></div>`)
+    e.append(c);
+  }
+}
+
+$(function() {
+  $("#cat-all").addClass("cat-selected");
+  randomarticles(".random-articles");
+});
+
 $(".cat").bind("click", function(e) {
   var cat = e.target.id,
     selected = $(".cat-selected");
