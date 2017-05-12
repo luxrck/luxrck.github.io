@@ -76,7 +76,7 @@ var articles = [
 }
 
 .side > h4 {
-  padding: 0px 2em;
+  padding: 0px 8px;
 }
 </style>
 

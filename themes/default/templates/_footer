@@ -1,6 +1,6 @@
 <footer class="footer">
   <div class="external-links">
-  {% for w, l in this.config.externals.items() %}
+  {% for w, l in this.config.external_links.items() %}
     <a href="{{l}}" class="external-link" title="{{w}}"><i class="fa fa-{{w}}"></i></a>
   {% endfor %}
   </div>
