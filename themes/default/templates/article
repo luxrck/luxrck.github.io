@@ -27,6 +27,10 @@
 .affix {
   top: 0px;
 }
+
+.article-header {
+  margin-bottom: 1em;
+}
 </style>
 
 <script>

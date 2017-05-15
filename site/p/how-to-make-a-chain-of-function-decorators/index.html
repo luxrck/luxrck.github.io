@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>How to make a chain of function decorators?</title>
+    <script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+
+    <link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Pacifico' />
+    <link rel='stylesheet' type='text/css' href="//fonts.googleapis.com/css?family=Orbitron" />
+
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/solarized-dark.min.css" />
+    <script src="/assets/theme/highlight.pack.js"></script>
+
+    <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+  
+<style>
+.main {
+  grid-area: main;
+  display: grid;
+  grid: 1fr 1fr 1fr 1fr / auto;
+  grid-template-areas: "content content content side";
+}
+.header {
+  grid-area: header;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+.content {
+  grid-area: content;
+}
+.side {
+  grid-area: side;
+}
+.footer {
+  grid-area: footer;
+}
+.grid-layout {
+  width: 100%;
+  /*height: 100%;*/
+  display: grid;
+  grid: 168px 1fr 64px / 1fr 1fr 1fr 1fr;
+  grid-template-areas:  "header header header header"
+                        "content content content side"
+                        "footer footer footer footer";
+  grid-gap: 1em 1em;
+}
+
+@media screen and (max-width: 800px) {
+  .grid-layout {
+      grid-template-columns: 100%;
+      grid-template-areas: "header"
+                           "content"
+                           "footer";
+  }
+  .side {
+    display: none;
+  }
+}
+</style>
+<div class="container">
+  <div class="grid-layout">
+    <header id="header" class="header">
+  <div class="header-info">
+    <a href="/" class="header-logo">Sagittaruis A*</a>
+    
+    <q class="header-summary col-sm-5 col-xs-10">fuck →you ↑you ↗you ↓you ↙you and ↩ you</q>
+    
+  </div>
+  <div class="header-nav">
+  
+    <a href="/">Index</a>
+    <span class="fa fa-angle-right"></span>
+    <a href="/p/how-to-make-a-chain-of-function-decorators">How to make a chain of function decorators?</a>
+  
+  </div>
+</header>
+    
+<!-- <div class="main"> -->
+  <div class="article content">
+    <div class="article-header">
+      <div class="article-tags">
+      
+        <a class="cat">python</a>
+      
+        <a class="cat">decorator</a>
+      
+      </div>
+    </div>
+    <article id="article" class="article-content"><h2><a href="http://stackoverflow.com/questions/739654/how-to-make-a-chain-of-function-decorators">How to make a chain of function decorators?</a></h2>
+<h3>Decorator Basics</h3>
+<h4>Python’s functions are objects</h4>
+<p>To understand decorators, you must first understand that functions are objects in Python. This has important consequences. Let’s see why with a simple example :</p>
+<pre><code class="lang-python">def shout(word=&quot;yes&quot;):
+    return word.capitalize()+&quot;!&quot;
+
+print(shout())
+# outputs : &#39;Yes!&#39;
+
+# As an object, you can assign the function to a variable like any other object
+scream = shout
+
+# Notice we don&#39;t use parentheses: we are not calling the function,
+# we are putting the function &quot;shout&quot; into the variable &quot;scream&quot;.
+# It means you can then call &quot;shout&quot; from &quot;scream&quot;:
+
+print(scream())
+# outputs : &#39;Yes!&#39;
+
+# More than that, it means you can remove the old name &#39;shout&#39;,
+# and the function will still be accessible from &#39;scream&#39;
+
+del shout
+try:
+    print(shout())
+except NameError, e:
+    print(e)
+    #outputs: &quot;name &#39;shout&#39; is not defined&quot;
+
+print(scream())
+# outputs: &#39;Yes!&#39;
+</code></pre>
+<p>Keep this in mind. We’ll circle back to it shortly.</p>
+<p>Another interesting property of Python functions is they can be defined inside another function!</p>
+<pre><code class="lang-python">def talk():
+
+    # You can define a function on the fly in &quot;talk&quot; ...
+    def whisper(word=&quot;yes&quot;):
+        return word.lower()+&quot;...&quot;
+
+    # ... and use it right away!
+    print(whisper())
+
+# You call &quot;talk&quot;, that defines &quot;whisper&quot; EVERY TIME you call it, then
+# &quot;whisper&quot; is called in &quot;talk&quot;.
+talk()
+# outputs:
+# &quot;yes...&quot;
+
+# But &quot;whisper&quot; DOES NOT EXIST outside &quot;talk&quot;:
+
+try:
+    print(whisper())
+except NameError, e:
+    print(e)
+    #outputs : &quot;name &#39;whisper&#39; is not defined&quot;*
+    #Python&#39;s functions are objects
+</code></pre>
+<h4>Functions references</h4>
+<p>Okay, still here? Now the fun part...</p>
+<p>You’ve seen that functions are objects. Therefore, functions:</p>
+<ul>
+<li>can be assigned to a variable</li>
+<li>can be defined in another function</li>
+</ul>
+<p>That means that <strong>a function can</strong> <code>return</code> <strong>another function</strong>.</p>
+<pre><code class="lang-python">def getTalk(kind=&quot;shout&quot;):
+
+    # We define functions on the fly
+    def shout(word=&quot;yes&quot;):
+        return word.capitalize()+&quot;!&quot;
+
+    def whisper(word=&quot;yes&quot;) :
+        return word.lower()+&quot;...&quot;;
+
+    # Then we return one of them
+    if kind == &quot;shout&quot;:
+        # We don&#39;t use &quot;()&quot;, we are not calling the function,
+        # we are returning the function object
+        return shout
+    else:
+        return whisper
+
+# How do you use this strange beast?
+
+# Get the function and assign it to a variable
+talk = getTalk()
+
+# You can see that &quot;talk&quot; is here a function object:
+print(talk)
+#outputs : &lt;function shout at 0xb7ea817c&gt;
+
+# The object is the one returned by the function:
+print(talk())
+#outputs : Yes!
+
+# And you can even use it directly if you feel wild:
+print(getTalk(&quot;whisper&quot;)())
+#outputs : yes...
+</code></pre>
+<p>There’s more!</p>
+<p>If you can <code>return</code> a function, you can pass one as a parameter:</p>
+<pre><code class="lang-python">def doSomethingBefore(func):
+    print(&quot;I do something before then I call the function you gave me&quot;)
+    print(func())
+
+doSomethingBefore(scream)
+#outputs:
+#I do something before then I call the function you gave me
+#Yes!
+</code></pre>
+<p>Well, you just have everything needed to understand decorators. You see, decorators are “wrappers”, which means that <strong>they let you execute code before and after the function they decorate</strong> without modifying the function itself.</p>
+<h4>Handcrafted decorators</h4>
+<p>How you’d do it manually:</p>
+<pre><code class="lang-python"># A decorator is a function that expects ANOTHER function as parameter
+def my_shiny_new_decorator(a_function_to_decorate):
+
+    # Inside, the decorator defines a function on the fly: the wrapper.
+    # This function is going to be wrapped around the original function
+    # so it can execute code before and after it.
+    def the_wrapper_around_the_original_function():
+
+        # Put here the code you want to be executed BEFORE the original function is called
+        print(&quot;Before the function runs&quot;)
+
+        # Call the function here (using parentheses)
+        a_function_to_decorate()
+
+        # Put here the code you want to be executed AFTER the original function is called
+        print(&quot;After the function runs&quot;)
+
+    # At this point, &quot;a_function_to_decorate&quot; HAS NEVER BEEN EXECUTED.
+    # We return the wrapper function we have just created.
+    # The wrapper contains the function and the code to execute before and after. It’s ready to use!
+    return the_wrapper_around_the_original_function
+
+# Now imagine you create a function you don&#39;t want to ever touch again.
+def a_stand_alone_function():
+    print(&quot;I am a stand alone function, don&#39;t you dare modify me&quot;)
+
+a_stand_alone_function()
+#outputs: I am a stand alone function, don&#39;t you dare modify me
+
+# Well, you can decorate it to extend its behavior.
+# Just pass it to the decorator, it will wrap it dynamically in
+# any code you want and return you a new function ready to be used:
+
+a_stand_alone_function_decorated = my_shiny_new_decorator(a_stand_alone_function)
+a_stand_alone_function_decorated()
+#outputs:
+#Before the function runs
+#I am a stand alone function, don&#39;t you dare modify me
+#After the function runs
+</code></pre>
+<p>Now, you probably want that every time you call <code>a_stand_alone_function</code>, <code>a_stand_alone_function_decorated</code> is called instead. That’s easy, just overwrite <code>a_stand_alone_function</code> with the function returned by <code>my_shiny_new_decorator</code>:</p>
+<pre><code class="lang-python">a_stand_alone_function = my_shiny_new_decorator(a_stand_alone_function)
+a_stand_alone_function()
+#outputs:
+#Before the function runs
+#I am a stand alone function, don&#39;t you dare modify me
+#After the function runs
+
+# That’s EXACTLY what decorators do!
+</code></pre>
+<h4>Decorators demystified</h4>
+<p>The previous example, using the decorator syntax:</p>
+<pre><code class="lang-python">@my_shiny_new_decorator
+def another_stand_alone_function():
+    print(&quot;Leave me alone&quot;)
+
+another_stand_alone_function()
+#outputs:
+#Before the function runs
+#Leave me alone
+#After the function runs
+</code></pre>
+<p>Yes, that’s all, it’s that simple. <code>@decorator</code> is just a shortcut to:</p>
+<pre><code class="lang-python">another_stand_alone_function = my_shiny_new_decorator(another_stand_alone_function)
+</code></pre>
+<p>Decorators are just a pythonic variant of the <a href="http://en.wikipedia.org/wiki/Decorator_pattern">decorator design pattern</a>. There are several classic design patterns embedded in Python to ease development (like iterators).</p>
+<p>Of course, you can accumulate decorators:</p>
+<pre><code class="lang-python">def bread(func):
+    def wrapper():
+        print(&quot;&lt;/&#39;&#39;&#39;&#39;&#39;&#39;\&gt;&quot;)
+        func()
+        print(&quot;&lt;\______/&gt;&quot;)
+    return wrapper
+
+def ingredients(func):
+    def wrapper():
+        print(&quot;#tomatoes#&quot;)
+        func()
+        print(&quot;~salad~&quot;)
+    return wrapper
+
+def sandwich(food=&quot;--ham--&quot;):
+    print(food)
+
+sandwich()
+#outputs: --ham--
+sandwich = bread(ingredients(sandwich))
+sandwich()
+#outputs:
+#&lt;/&#39;&#39;&#39;&#39;&#39;&#39;\&gt;
+# #tomatoes#
+# --ham--
+# ~salad~
+#&lt;\______/&gt;
+</code></pre>
+<p>Using the Python decorator syntax:</p>
+<pre><code class="lang-python">@bread
+@ingredients
+def sandwich(food=&quot;--ham--&quot;):
+    print(food)
+
+sandwich()
+#outputs:
+#&lt;/&#39;&#39;&#39;&#39;&#39;&#39;\&gt;
+# #tomatoes#
+# --ham--
+# ~salad~
+#&lt;\______/&gt;
+</code></pre>
+<p>The order you set the decorators MATTERS:</p>
+<pre><code class="lang-python">@ingredients
+@bread
+def strange_sandwich(food=&quot;--ham--&quot;):
+    print(food)
+
+strange_sandwich()
+#outputs:
+##tomatoes#
+#&lt;/&#39;&#39;&#39;&#39;&#39;&#39;\&gt;
+# --ham--
+#&lt;\______/&gt;
+# ~salad~
+</code></pre>
+<h4>Now: to answer the question...</h4>
+<p>As a conclusion, you can easily see how to answer the question:</p>
+<pre><code class="lang-python"># The decorator to make it bold
+def makebold(fn):
+    # The new function the decorator returns
+    def wrapper():
+        # Insertion of some code before and after
+        return &quot;&lt;b&gt;&quot; + fn() + &quot;&lt;/b&gt;&quot;
+    return wrapper
+
+# The decorator to make it italic
+def makeitalic(fn):
+    # The new function the decorator returns
+    def wrapper():
+        # Insertion of some code before and after
+        return &quot;&lt;i&gt;&quot; + fn() + &quot;&lt;/i&gt;&quot;
+    return wrapper
+
+@makebold
+@makeitalic
+def say():
+    return &quot;hello&quot;
+
+print(say())
+#outputs: &lt;b&gt;&lt;i&gt;hello&lt;/i&gt;&lt;/b&gt;
+
+# This is the exact equivalent to
+def say():
+    return &quot;hello&quot;
+say = makebold(makeitalic(say))
+
+print(say())
+#outputs: &lt;b&gt;&lt;i&gt;hello&lt;/i&gt;&lt;/b&gt;
+</code></pre>
+<p>You can now just leave happy, or burn your brain a little bit more and see advanced uses of decorators.</p>
+<h3>Taking decorators to the next level</h3>
+<h4>Passing arguments to the decorated function</h4>
+<pre><code class="lang-python"># It’s not black magic, you just have to let the wrapper
+# pass the argument:
+
+def a_decorator_passing_arguments(function_to_decorate):
+    def a_wrapper_accepting_arguments(arg1, arg2):
+        print(&quot;I got args! Look: {0}, {1}&quot;.format(arg1, arg2))
+        function_to_decorate(arg1, arg2)
+    return a_wrapper_accepting_arguments
+
+# Since when you are calling the function returned by the decorator, you are
+# calling the wrapper, passing arguments to the wrapper will let it pass them to
+# the decorated function
+
+@a_decorator_passing_arguments
+def print_full_name(first_name, last_name):
+    print(&quot;My name is {0} {1}&quot;.format(first_name, last_name))
+
+print_full_name(&quot;Peter&quot;, &quot;Venkman&quot;)
+# outputs:
+#I got args! Look: Peter Venkman
+#My name is Peter Venkman
+</code></pre>
+<h4>Decorating methods</h4>
+<p>One nifty thing about Python is that methods and functions are really the same. The only difference is that methods expect that their first argument is a reference to the current object (<code>self</code>).</p>
+<p>That means you can build a decorator for methods the same way! Just remember to take <code>self</code> into consideration:</p>
+<pre><code class="lang-python">def method_friendly_decorator(method_to_decorate):
+    def wrapper(self, lie):
+        lie = lie - 3 # very friendly, decrease age even more :-)
+        return method_to_decorate(self, lie)
+    return wrapper
+
+
+class Lucy(object):
+
+    def __init__(self):
+        self.age = 32
+
+    @method_friendly_decorator
+    def sayYourAge(self, lie):
+        print(&quot;I am {0}, what did you think?&quot;.format(self.age + lie))
+
+l = Lucy()
+l.sayYourAge(-3)
+#outputs: I am 26, what did you think?
+</code></pre>
+<p>If you’re making general-purpose decorator--one you’ll apply to any function or method, no matter its arguments--then just use <code>*args, **kwargs</code>:</p>
+<pre><code class="lang-python">def a_decorator_passing_arbitrary_arguments(function_to_decorate):
+    # The wrapper accepts any arguments
+    def a_wrapper_accepting_arbitrary_arguments(*args, **kwargs):
+        print(&quot;Do I have args?:&quot;)
+        print(args)
+        print(kwargs)
+        # Then you unpack the arguments, here *args, **kwargs
+        # If you are not familiar with unpacking, check:
+        # http://www.saltycrane.com/blog/2008/01/how-to-use-args-and-kwargs-in-python/
+        function_to_decorate(*args, **kwargs)
+    return a_wrapper_accepting_arbitrary_arguments
+
+@a_decorator_passing_arbitrary_arguments
+def function_with_no_argument():
+    print(&quot;Python is cool, no argument here.&quot;)
+
+function_with_no_argument()
+#outputs
+#Do I have args?:
+#()
+#{}
+#Python is cool, no argument here.
+
+@a_decorator_passing_arbitrary_arguments
+def function_with_arguments(a, b, c):
+    print(a, b, c)
+
+function_with_arguments(1,2,3)
+#outputs
+#Do I have args?:
+#(1, 2, 3)
+#{}
+#1 2 3
+
+@a_decorator_passing_arbitrary_arguments
+def function_with_named_arguments(a, b, c, platypus=&quot;Why not ?&quot;):
+    print(&quot;Do {0}, {1} and {2} like platypus? {3}&quot;.format(a, b, c, platypus))
+
+function_with_named_arguments(&quot;Bill&quot;, &quot;Linus&quot;, &quot;Steve&quot;, platypus=&quot;Indeed!&quot;)
+#outputs
+#Do I have args ? :
+#(&#39;Bill&#39;, &#39;Linus&#39;, &#39;Steve&#39;)
+#{&#39;platypus&#39;: &#39;Indeed!&#39;}
+#Do Bill, Linus and Steve like platypus? Indeed!
+
+class Mary(object):
+
+    def __init__(self):
+        self.age = 31
+
+    @a_decorator_passing_arbitrary_arguments
+    def sayYourAge(self, lie=-3): # You can now add a default value
+        print(&quot;I am {0}, what did you think?&quot;.format(self.age + lie))
+
+m = Mary()
+m.sayYourAge()
+#outputs
+# Do I have args?:
+#(&lt;__main__.Mary object at 0xb7d303ac&gt;,)
+#{}
+#I am 28, what did you think?
+</code></pre>
+<h4>Passing arguments to the decorator</h4>
+<p>Great, now what would you say about passing arguments to the decorator itself?</p>
+<p>This can get somewhat twisted, since a decorator must accept a function as an argument. Therefore, you cannot pass the decorated function’s arguments directly to the decorator.</p>
+<p>Before rushing to the solution, let’s write a little reminder:</p>
+<pre><code class="lang-python"># Decorators are ORDINARY functions
+def my_decorator(func):
+    print(&quot;I am an ordinary function&quot;)
+    def wrapper():
+        print(&quot;I am function returned by the decorator&quot;)
+        func()
+    return wrapper
+
+# Therefore, you can call it without any &quot;@&quot;
+
+def lazy_function():
+    print(&quot;zzzzzzzz&quot;)
+
+decorated_function = my_decorator(lazy_function)
+#outputs: I am an ordinary function
+
+# It outputs &quot;I am an ordinary function&quot;, because that’s just what you do:
+# calling a function. Nothing magic.
+
+@my_decorator
+def lazy_function():
+    print(&quot;zzzzzzzz&quot;)
+
+#outputs: I am an ordinary function
+</code></pre>
+<p>It’s exactly the same. "<code>my_decorator</code>" is called. So when you <code>@my_decorator</code>, you are telling Python to call the function 'labelled by the variable "<code>my_decorator</code>"'.</p>
+<p>This is important! The label you give can point directly to the decorator—<strong>or not</strong>.</p>
+<p>Let’s get evil. ☺</p>
+<pre><code class="lang-python">def decorator_maker():
+
+    print(&quot;I make decorators! I am executed only once: &quot;
+          &quot;when you make me create a decorator.&quot;)
+
+    def my_decorator(func):
+
+        print(&quot;I am a decorator! I am executed only when you decorate a function.&quot;)
+
+        def wrapped():
+            print(&quot;I am the wrapper around the decorated function. &quot;
+                  &quot;I am called when you call the decorated function. &quot;
+                  &quot;As the wrapper, I return the RESULT of the decorated function.&quot;)
+            return func()
+
+        print(&quot;As the decorator, I return the wrapped function.&quot;)
+
+        return wrapped
+
+    print(&quot;As a decorator maker, I return a decorator&quot;)
+    return my_decorator
+
+# Let’s create a decorator. It’s just a new function after all.
+new_decorator = decorator_maker()
+#outputs:
+#I make decorators! I am executed only once: when you make me create a decorator.
+#As a decorator maker, I return a decorator
+
+# Then we decorate the function
+
+def decorated_function():
+    print(&quot;I am the decorated function.&quot;)
+
+decorated_function = new_decorator(decorated_function)
+#outputs:
+#I am a decorator! I am executed only when you decorate a function.
+#As the decorator, I return the wrapped function
+
+# Let’s call the function:
+decorated_function()
+#outputs:
+#I am the wrapper around the decorated function. I am called when you call the decorated function.
+#As the wrapper, I return the RESULT of the decorated function.
+#I am the decorated function.
+</code></pre>
+<p>No surprise here.</p>
+<p>Let’s do EXACTLY the same thing, but skip all the pesky intermediate variables:</p>
+<pre><code class="lang-python">def decorated_function():
+    print(&quot;I am the decorated function.&quot;)
+decorated_function = decorator_maker()(decorated_function)
+#outputs:
+#I make decorators! I am executed only once: when you make me create a decorator.
+#As a decorator maker, I return a decorator
+#I am a decorator! I am executed only when you decorate a function.
+#As the decorator, I return the wrapped function.
+
+# Finally:
+decorated_function()
+#outputs:
+#I am the wrapper around the decorated function. I am called when you call the decorated function.
+#As the wrapper, I return the RESULT of the decorated function.
+#I am the decorated function.
+</code></pre>
+<p>Let’s make it even shorter:</p>
+<pre><code class="lang-python">@decorator_maker()
+def decorated_function():
+    print(&quot;I am the decorated function.&quot;)
+#outputs:
+#I make decorators! I am executed only once: when you make me create a decorator.
+#As a decorator maker, I return a decorator
+#I am a decorator! I am executed only when you decorate a function.
+#As the decorator, I return the wrapped function.
+
+#Eventually:
+decorated_function()
+#outputs:
+#I am the wrapper around the decorated function. I am called when you call the decorated function.
+#As the wrapper, I return the RESULT of the decorated function.
+#I am the decorated function.
+</code></pre>
+<p>Hey, did you see that? We used a function call with the "<code>@</code>" syntax! :-)</p>
+<p>So, back to decorators with arguments. If we can use functions to generate the decorator on the fly, we can pass arguments to that function, right?</p>
+<pre><code class="lang-python">def decorator_maker_with_arguments(decorator_arg1, decorator_arg2):
+
+    print(&quot;I make decorators! And I accept arguments: {0}, {1}&quot;.format(decorator_arg1, decorator_arg2))
+
+    def my_decorator(func):
+        # The ability to pass arguments here is a gift from closures.
+        # If you are not comfortable with closures, you can assume it’s ok,
+        # or read: http://stackoverflow.com/questions/13857/can-you-explain-closures-as-they-relate-to-python
+        print(&quot;I am the decorator. Somehow you passed me arguments: {0}, {1}&quot;.format(decorator_arg1, decorator_arg2))
+
+        # Don&#39;t confuse decorator arguments and function arguments!
+        def wrapped(function_arg1, function_arg2) :
+            print(&quot;I am the wrapper around the decorated function.\n&quot;
+                  &quot;I can access all the variables\n&quot;
+                  &quot;\t- from the decorator: {0} {1}\n&quot;
+                  &quot;\t- from the function call: {2} {3}\n&quot;
+                  &quot;Then I can pass them to the decorated function&quot;
+                  .format(decorator_arg1, decorator_arg2,
+                          function_arg1, function_arg2))
+            return func(function_arg1, function_arg2)
+
+        return wrapped
+
+    return my_decorator
+
+@decorator_maker_with_arguments(&quot;Leonard&quot;, &quot;Sheldon&quot;)
+def decorated_function_with_arguments(function_arg1, function_arg2):
+    print(&quot;I am the decorated function and only knows about my arguments: {0}&quot;
+           &quot; {1}&quot;.format(function_arg1, function_arg2))
+
+decorated_function_with_arguments(&quot;Rajesh&quot;, &quot;Howard&quot;)
+#outputs:
+#I make decorators! And I accept arguments: Leonard Sheldon
+#I am the decorator. Somehow you passed me arguments: Leonard Sheldon
+#I am the wrapper around the decorated function.
+#I can access all the variables
+#   - from the decorator: Leonard Sheldon
+#   - from the function call: Rajesh Howard
+#Then I can pass them to the decorated function
+#I am the decorated function and only knows about my arguments: Rajesh Howard
+</code></pre>
+<p>Here it is: a decorator with arguments. Arguments can be set as variable:</p>
+<pre><code class="lang-python">c1 = &quot;Penny&quot;
+c2 = &quot;Leslie&quot;
+
+@decorator_maker_with_arguments(&quot;Leonard&quot;, c1)
+def decorated_function_with_arguments(function_arg1, function_arg2):
+    print(&quot;I am the decorated function and only knows about my arguments:&quot;
+           &quot; {0} {1}&quot;.format(function_arg1, function_arg2))
+
+decorated_function_with_arguments(c2, &quot;Howard&quot;)
+#outputs:
+#I make decorators! And I accept arguments: Leonard Penny
+#I am the decorator. Somehow you passed me arguments: Leonard Penny
+#I am the wrapper around the decorated function.
+#I can access all the variables
+#   - from the decorator: Leonard Penny
+#   - from the function call: Leslie Howard
+#Then I can pass them to the decorated function
+#I am the decorated function and only knows about my arguments: Leslie Howard
+</code></pre>
+<p>As you can see, you can pass arguments to the decorator like any function using this trick. You can even use <code>*args, **kwargs</code> if you wish. But remember decorators are called <strong>only once</strong>. Just when Python imports the script. You can't dynamically set the arguments afterwards. When you do "import x", <strong>the function is already decorated</strong>, so you can't change anything.</p>
+<h3>Let’s practice: decorating a decorator</h3>
+<p>Okay, as a bonus, I'll give you a snippet to make any decorator accept generically any argument. After all, in order to accept arguments, we created our decorator using another function.</p>
+<p>We wrapped the decorator.</p>
+<p>Anything else we saw recently that wrapped function?</p>
+<p>Oh yes, decorators!</p>
+<p>Let’s have some fun and write a decorator for the decorators:</p>
+<pre><code class="lang-python">def decorator_with_args(decorator_to_enhance):
+    &quot;&quot;&quot;
+    This function is supposed to be used as a decorator.
+    It must decorate an other function, that is intended to be used as a decorator.
+    Take a cup of coffee.
+    It will allow any decorator to accept an arbitrary number of arguments,
+    saving you the headache to remember how to do that every time.
+    &quot;&quot;&quot;
+
+    # We use the same trick we did to pass arguments
+    def decorator_maker(*args, **kwargs):
+
+        # We create on the fly a decorator that accepts only a function
+        # but keeps the passed arguments from the maker.
+        def decorator_wrapper(func):
+
+            # We return the result of the original decorator, which, after all,
+            # IS JUST AN ORDINARY FUNCTION (which returns a function).
+            # Only pitfall: the decorator must have this specific signature or it won&#39;t work:
+            return decorator_to_enhance(func, *args, **kwargs)
+
+        return decorator_wrapper
+
+    return decorator_maker
+</code></pre>
+<p>It can be used as follows:</p>
+<pre><code class="lang-python"># You create the function you will use as a decorator. And stick a decorator on it :-)
+# Don&#39;t forget, the signature is &quot;decorator(func, *args, **kwargs)&quot;
+@decorator_with_args
+def decorated_decorator(func, *args, **kwargs):
+    def wrapper(function_arg1, function_arg2):
+        print(&quot;Decorated with {0} {1}&quot;.format(args, kwargs))
+        return func(function_arg1, function_arg2)
+    return wrapper
+
+# Then you decorate the functions you wish with your brand new decorated decorator.
+
+@decorated_decorator(42, 404, 1024)
+def decorated_function(function_arg1, function_arg2):
+    print(&quot;Hello {0} {1}&quot;.format(function_arg1, function_arg2))
+
+decorated_function(&quot;Universe and&quot;, &quot;everything&quot;)
+#outputs:
+#Decorated with (42, 404, 1024) {}
+#Hello Universe and everything
+
+# Whoooot!
+</code></pre>
+<p>I know, the last time you had this feeling, it was after listening a guy saying: "before understanding recursion, you must first understand recursion". But now, don't you feel good about mastering this?</p>
+<h3>Best practices: decorators</h3>
+<ul>
+<li>Decorators were introduced in Python 2.4, so be sure your code will be run on &gt;= 2.4.</li>
+<li>Decorators slow down the function call. Keep that in mind.</li>
+<li><strong>You cannot un-decorate a function</strong>. (There are hacks to create decorators that can be removed, but nobody uses them.) So once a function is decorated, it’s decorated for all the code.</li>
+<li>Decorators wrap functions, which can make them hard to debug. (This gets better from Python &gt;= 2.5; see below.)</li>
+</ul>
+<p>The <code>functools</code> module was introduced in Python 2.5. It includes the function <code>functools.wraps()</code>, which copies the name, module, and docstring of the decorated function to its wrapper.</p>
+<p>(Fun fact: <code>functools.wraps()</code> is a decorator! ☺)</p>
+<pre><code class="lang-python"># For debugging, the stacktrace prints you the function __name__
+def foo():
+    print(&quot;foo&quot;)
+
+print(foo.__name__)
+#outputs: foo
+
+# With a decorator, it gets messy
+def bar(func):
+    def wrapper():
+        print(&quot;bar&quot;)
+        return func()
+    return wrapper
+
+@bar
+def foo():
+    print(&quot;foo&quot;)
+
+print(foo.__name__)
+#outputs: wrapper
+
+# &quot;functools&quot; can help for that
+
+import functools
+
+def bar(func):
+    # We say that &quot;wrapper&quot;, is wrapping &quot;func&quot;
+    # and the magic begins
+    @functools.wraps(func)
+    def wrapper():
+        print(&quot;bar&quot;)
+        return func()
+    return wrapper
+
+@bar
+def foo():
+    print(&quot;foo&quot;)
+
+print(foo.__name__)
+#outputs: foo
+</code></pre>
+<h3>How can the decorators be useful?</h3>
+<p><strong>Now the big question</strong>: What can I use decorators for?</p>
+<p>Seem cool and powerful, but a practical example would be great. Well, there are 1000 possibilities. Classic uses are extending a function behavior from an external lib (you can't modify it), or for debugging (you don't want to modify it because it’s temporary).</p>
+<p>You can use them to extend several functions in a DRY’s way, like so:</p>
+<pre><code class="lang-python">def benchmark(func):
+    &quot;&quot;&quot;
+    A decorator that prints the time a function takes
+    to execute.
+    &quot;&quot;&quot;
+    import time
+    def wrapper(*args, **kwargs):
+        t = time.clock()
+        res = func(*args, **kwargs)
+        print(&quot;{0} {1}&quot;.format(func.__name__, time.clock()-t))
+        return res
+    return wrapper
+
+
+def logging(func):
+    &quot;&quot;&quot;
+    A decorator that logs the activity of the script.
+    (it actually just prints it, but it could be logging!)
+    &quot;&quot;&quot;
+    def wrapper(*args, **kwargs):
+        res = func(*args, **kwargs)
+        print(&quot;{0} {1} {2}&quot;.format(func.__name__, args, kwargs))
+        return res
+    return wrapper
+
+
+def counter(func):
+    &quot;&quot;&quot;
+    A decorator that counts and prints the number of times a function has been executed
+    &quot;&quot;&quot;
+    def wrapper(*args, **kwargs):
+        wrapper.count = wrapper.count + 1
+        res = func(*args, **kwargs)
+        print(&quot;{0} has been used: {1}x&quot;.format(func.__name__, wrapper.count))
+        return res
+    wrapper.count = 0
+    return wrapper
+
+@counter
+@benchmark
+@logging
+def reverse_string(string):
+    return str(reversed(string))
+
+print(reverse_string(&quot;Able was I ere I saw Elba&quot;))
+print(reverse_string(&quot;A man, a plan, a canoe, pasta, heros, rajahs, a coloratura, maps, snipe, percale, macaroni, a gag, a banana bag, a tan, a tag, a banana bag again (or a camel), a crepe, pins, Spam, a rut, a Rolo, cash, a jar, sore hats, a peon, a canal: Panama!&quot;))
+
+#outputs:
+#reverse_string (&#39;Able was I ere I saw Elba&#39;,) {}
+#wrapper 0.0
+#wrapper has been used: 1x
+#ablE was I ere I saw elbA
+#reverse_string (&#39;A man, a plan, a canoe, pasta, heros, rajahs, a coloratura, maps, snipe, percale, macaroni, a gag, a banana bag, a tan, a tag, a banana bag again (or a camel), a crepe, pins, Spam, a rut, a Rolo, cash, a jar, sore hats, a peon, a canal: Panama!&#39;,) {}
+#wrapper 0.0
+#wrapper has been used: 2x
+#!amanaP :lanac a ,noep a ,stah eros ,raj a ,hsac ,oloR a ,tur a ,mapS ,snip ,eperc a ,)lemac a ro( niaga gab ananab a ,gat a ,nat a ,gab ananab a ,gag a ,inoracam ,elacrep ,epins ,spam ,arutaroloc a ,shajar ,soreh ,atsap ,eonac a ,nalp a ,nam A
+</code></pre>
+<p>Of course the good thing with decorators is that you can use them right away on almost anything without rewriting. DRY, I said:</p>
+<pre><code class="lang-python">@counter
+@benchmark
+@logging
+def get_random_futurama_quote():
+    from urllib import urlopen
+    result = urlopen(&quot;http://subfusion.net/cgi-bin/quote.pl?quote=futurama&quot;).read()
+    try:
+        value = result.split(&quot;&lt;br&gt;&lt;b&gt;&lt;hr&gt;&lt;br&gt;&quot;)[1].split(&quot;&lt;br&gt;&lt;br&gt;&lt;hr&gt;&quot;)[0]
+        return value.strip()
+    except:
+        return &quot;No, I&#39;m ... doesn&#39;t!&quot;
+
+
+print(get_random_futurama_quote())
+print(get_random_futurama_quote())
+
+#outputs:
+#get_random_futurama_quote () {}
+#wrapper 0.02
+#wrapper has been used: 1x
+#The laws of science be a harsh mistress.
+#get_random_futurama_quote () {}
+#wrapper 0.01
+#wrapper has been used: 2x
+#Curse you, merciful Poseidon!
+</code></pre>
+<p>Python itself provides several decorators: <code>property</code>, <code>staticmethod</code>, etc.</p>
+<ul>
+<li>Django uses decorators to manage caching and view permissions.</li>
+<li>Twisted to fake inlining asynchronous functions calls.</li>
+</ul>
+<p>This really is a large playground.</p>
+</article>
+  </div>
+
+  <div class="side"><nav id="toc"></nav></div>
+<!-- </div> -->
+
+    <footer class="footer">
+  <div class="external-links">
+  
+    <a href="https://github.com/luxrck" class="external-link" title="github"><i class="fa fa-github"></i></a>
+  
+  </div>
+</footer>
+  </div>
+</div>
+
+  <link rel="stylesheet" type="text/css" href="/assets/theme/app.css" />
+  <script>
+  hljs.initHighlightingOnLoad();
+
+  var categories = {"name": "all", "rank": 3, "sub": [{"name": "stackoverflow", "rank": 2, "sub": []}, {"name": "debug", "rank": 1, "sub": []}]};
+  var tags = [{"name": "python", "rank": 2}, {"name": "decorator", "rank": 1}, {"name": "gevent", "rank": 1}, {"name": "ssl", "rank": 1}, {"name": "yield", "rank": 1}];
+
+  var tag = undefined;
+  var category = undefined;
+  var article  = {"categories": ["all", "stackoverflow"], "date": "2017-05-15 09:42", "name": "how-to-make-a-chain-of-function-decorators", "tags": ["python", "decorator"], "time": 1494812520, "title": "How to make a chain of function decorators?"};
+  </script>
+  
+<link rel="stylesheet" type="text/css" href="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.css" />
+<script src="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.js"></script>
+
+<style>
+.affix {
+  top: 0px;
+}
+
+.article-header {
+  margin-bottom: 1em;
+}
+</style>
+
+<script>
+$(function() {
+  var navSelector = '#toc';
+  var $myNav = $(navSelector);
+  Toc.init($myNav);
+  $('body').scrollspy({
+    target: navSelector
+    });
+
+  // FIXME: this won't working on android chrome, why ?
+  $myNav.affix({
+   offset: {
+     top: $myNav.offset().top,
+     }
+   });
+
+  // $(window).on("scroll", function(e) {
+  //   var e = $("#toc li.active").get(0);
+  //   if (e) {
+  //     e.scrollIntoView(false);
+  //   }
+  //   });
+});
+</script>
+
+  
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-99130329-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>

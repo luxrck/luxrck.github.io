@@ -1,11 +1,11 @@
 ---
-title: StackOverflow Questions Collection
+title: What does the “yield” keyword do in Python?
 date: 2017-04-18 13:42
-category: 
+category: stackoverflow
 tags: python, yield
 ---
 
-## Q1: [What does the “yield” keyword do in Python?](http://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do-in-python)
+## [What does the “yield” keyword do in Python?](http://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do-in-python)
 
 To understand what yield does, you must understand what generators are. And before generators come iterables.
 
@@ -229,7 +229,6 @@ Understanding the inner mechanisms of iteration
 Iteration is a process implying iterables (implementing the `__iter__()` method) and iterators (implementing the `__next__()` method). Iterables are any objects you can get an iterator from. Iterators are objects that let you iterate on iterables.
 
 More about it in this article about how does the for loop work.
-
 
 
 ---

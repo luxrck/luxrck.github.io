@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>gevent与requests混用时出现的ssl无限递归错误</title>
+    <script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+
+    <link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Pacifico' />
+    <link rel='stylesheet' type='text/css' href="//fonts.googleapis.com/css?family=Orbitron" />
+
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/solarized-dark.min.css" />
+    <script src="/assets/theme/highlight.pack.js"></script>
+
+    <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+  
+<style>
+.main {
+  grid-area: main;
+  display: grid;
+  grid: 1fr 1fr 1fr 1fr / auto;
+  grid-template-areas: "content content content side";
+}
+.header {
+  grid-area: header;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+.content {
+  grid-area: content;
+}
+.side {
+  grid-area: side;
+}
+.footer {
+  grid-area: footer;
+}
+.grid-layout {
+  width: 100%;
+  /*height: 100%;*/
+  display: grid;
+  grid: 168px 1fr 64px / 1fr 1fr 1fr 1fr;
+  grid-template-areas:  "header header header header"
+                        "content content content side"
+                        "footer footer footer footer";
+  grid-gap: 1em 1em;
+}
+
+@media screen and (max-width: 800px) {
+  .grid-layout {
+      grid-template-columns: 100%;
+      grid-template-areas: "header"
+                           "content"
+                           "footer";
+  }
+  .side {
+    display: none;
+  }
+}
+</style>
+<div class="container">
+  <div class="grid-layout">
+    <header id="header" class="header">
+  <div class="header-info">
+    <a href="/" class="header-logo">Sagittaruis A*</a>
+    
+    <q class="header-summary col-sm-5 col-xs-10">fuck →you ↑you ↗you ↓you ↙you and ↩ you</q>
+    
+  </div>
+  <div class="header-nav">
+  
+    <a href="/">Index</a>
+    <span class="fa fa-angle-right"></span>
+    <a href="/p/gevent-ssl-infinity-recursion-error">gevent与requests混用时出现的ssl无限递归错误</a>
+  
+  </div>
+</header>
+    
+<!-- <div class="main"> -->
+  <div class="article content">
+    <div class="article-header">
+      <div class="article-tags">
+      
+        <a class="cat">gevent</a>
+      
+        <a class="cat">ssl</a>
+      
+      </div>
+    </div>
+    <article id="article" class="article-content"><h3>environ</h3>
+<ul>
+<li>os: archlinux</li>
+<li>python: 3.6.1</li>
+<li>gevent: 1.2.1</li>
+<li>requests: 2.14.2</li>
+</ul>
+<h3>reference</h3>
+<ul>
+<li><a href="https://github.com/gevent/gevent/issues/903">SSLContext infinite recursion in Python 3.6 (gevent#903)</a></li>
+</ul>
+<h3>reproduce</h3>
+<p><code>vim test.py</code> :</p>
+<pre><code class="lang-python">import gevent.monkey
+from requests.packages.urllib3.util.ssl_ import create_urllib3_context
+
+# 将monkey patch置于create_urllib3_context引入之前可防止此错误出现。
+gevent.monkey.patch_all()
+
+create_urllib3_context()
+# output:
+# Traceback (most recent call last):
+#   File &quot;test.py&quot;, line 7, in &lt;module&gt;
+#     create_urllib3_context()
+#   File &quot;/usr/lib/python3.6/site-packages/requests/packages/urllib3/util/ssl_.py&quot;, line 265, in create_urllib3_context
+#     context.options |= options
+#   File &quot;/usr/lib/python3.6/ssl.py&quot;, line 459, in options
+#     super(SSLContext, SSLContext).options.__set__(self, value)
+#   File &quot;/usr/lib/python3.6/ssl.py&quot;, line 459, in options
+#     super(SSLContext, SSLContext).options.__set__(self, value)
+#   File &quot;/usr/lib/python3.6/ssl.py&quot;, line 459, in options
+#     super(SSLContext, SSLContext).options.__set__(self, value)
+#   [Previous line repeated 329 more times]
+# RecursionError: maximum recursion depth exceeded while calling a Python object
+</code></pre>
+<h3>debug</h3>
+<p><code>create_urllib3_context</code>代码片段：</p>
+<pre><code class="lang-python">...
+# requests/packages/urllib3/util/ssl_.py#L250
+
+context = SSLContext(ssl_version or ssl.PROTOCOL_SSLv23)
+
+# Setting the default here, as we may have no ssl module on import
+cert_reqs = ssl.CERT_REQUIRED if cert_reqs is None else cert_reqs
+
+if options is None:
+    options = 0
+    # SSLv2 is easily broken and is considered harmful and dangerous
+    options |= OP_NO_SSLv2
+    # SSLv3 has several problems and is now dangerous
+    options |= OP_NO_SSLv3
+    # Disable compression to prevent CRIME attacks for OpenSSL 1.0+
+    # (issue #309)
+    options |= OP_NO_COMPRESSION
+
+context.options |= options
+...
+</code></pre>
+<p>这里的<code>SSLContext</code>的类型为<code>ssl.SSLContext'</code>,而不是<code>gevent._ssl3.SSLContext</code>。
+即<code>gevent.monkey.patch_all</code>对其没起作用。</p>
+<p>查看<code>SSLContext</code>相关代码：</p>
+<pre><code class="lang-python">...
+# requests/packages/urllib3/util/ssl_.py#L86
+
+try:
+    from ssl import SSLContext  # Modern SSL?
+except ImportError:
+    import sys
+
+    class SSLContext(object):  # Platform-specific: Python 2 &amp; 3.1
+        supports_set_ciphers = ((2, 7) &lt;= sys.version_info &lt; (3,) or
+                                (3, 2) &lt;= sys.version_info)
+...
+</code></pre>
+<p><code>from ssl import SSLContext</code>是<code>gevent.monkey.patch_all</code>失效的原因所在。
+修正为：</p>
+<pre><code class="lang-python">import ssl
+SSLContext = lambda *args, **kw: ssl.SSLContext(*args, **kw)
+</code></pre>
+<p>当然最好的方式还是在引入<code>gevent</code>库后立即执行<code>monkey patch</code>代码。</p>
+<h3>analysis</h3>
+<p><code>gevent.monkey.patch_all</code>的位置放错导致了<code>create_urllib3_context</code>中的<code>context</code>
+的类型为<code>ssl.SSLContext</code>而不是<code>gevent._ssl3.SSLContext</code>。</p>
+<p>因此，<code>context.options |= options</code>最后会调用：</p>
+<pre><code class="lang-python"># ssl.py#L457
+
+@options.setter
+def options(self, value):
+    super(SSLContext, SSLContext).options.__set__(self, value)
+</code></pre>
+<p>而不是：</p>
+<pre><code class="lang-python"># gevent/_ssl3.py#L67
+
+# In 3.6, these became properties. They want to access the
+# property __set__ method in the superclass, and they do so by using
+# super(SSLContext, SSLContext). But we rebind SSLContext when we monkey
+# patch, which causes infinite recursion.
+# https://github.com/python/cpython/commit/328067c468f82e4ec1b5c510a4e84509e010f296
+# pylint:disable=no-member
+@orig_SSLContext.options.setter
+def options(self, value):
+    super(orig_SSLContext, orig_SSLContext).options.__set__(self, value)
+</code></pre>
+<p>但是，<strong>由于已经调用过了<code>monkey patch</code>代码</strong>，故此时的<code>SSLContext</code>实际上是<code>gevent._ssl3.SSLContext</code>，
+是<code>ssl.SSLContext</code>的子类。</p>
+<p>所以，<code>super(SSLContext, SSLContext).options</code>实际上是<code>super(gevent._ssl3.SSLContext, gevent._ssl3.SSLContext).options</code>，
+得到的结果是<code>ssl.SSLContext.options</code>，而不是我们所希望的<code>_ssl._SSLContext.options</code>。</p>
+<p>同时，这也造成了无限递归。</p>
+</article>
+  </div>
+
+  <div class="side"><nav id="toc"></nav></div>
+<!-- </div> -->
+
+    <footer class="footer">
+  <div class="external-links">
+  
+    <a href="https://github.com/luxrck" class="external-link" title="github"><i class="fa fa-github"></i></a>
+  
+  </div>
+</footer>
+  </div>
+</div>
+
+  <link rel="stylesheet" type="text/css" href="/assets/theme/app.css" />
+  <script>
+  hljs.initHighlightingOnLoad();
+
+  var categories = {"name": "all", "rank": 3, "sub": [{"name": "stackoverflow", "rank": 2, "sub": []}, {"name": "debug", "rank": 1, "sub": []}]};
+  var tags = [{"name": "python", "rank": 2}, {"name": "decorator", "rank": 1}, {"name": "gevent", "rank": 1}, {"name": "ssl", "rank": 1}, {"name": "yield", "rank": 1}];
+
+  var tag = undefined;
+  var category = undefined;
+  var article  = {"categories": ["all", "debug"], "date": "2017-05-15 16:35", "name": "gevent-ssl-infinity-recursion-error", "tags": ["gevent", "ssl"], "time": 1494837300, "title": "gevent\u4e0erequests\u6df7\u7528\u65f6\u51fa\u73b0\u7684ssl\u65e0\u9650\u9012\u5f52\u9519\u8bef"};
+  </script>
+  
+<link rel="stylesheet" type="text/css" href="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.css" />
+<script src="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.js"></script>
+
+<style>
+.affix {
+  top: 0px;
+}
+
+.article-header {
+  margin-bottom: 1em;
+}
+</style>
+
+<script>
+$(function() {
+  var navSelector = '#toc';
+  var $myNav = $(navSelector);
+  Toc.init($myNav);
+  $('body').scrollspy({
+    target: navSelector
+    });
+
+  // FIXME: this won't working on android chrome, why ?
+  $myNav.affix({
+   offset: {
+     top: $myNav.offset().top,
+     }
+   });
+
+  // $(window).on("scroll", function(e) {
+  //   var e = $("#toc li.active").get(0);
+  //   if (e) {
+  //     e.scrollIntoView(false);
+  //   }
+  //   });
+});
+</script>
+
+  
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-99130329-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>
