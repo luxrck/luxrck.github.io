@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>What does the “yield” keyword do in Python?</title>
+    <script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+
+    <link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Pacifico' />
+    <link rel='stylesheet' type='text/css' href="//fonts.googleapis.com/css?family=Orbitron" />
+
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/solarized-dark.min.css" />
+    <script src="/assets/theme/highlight.pack.js"></script>
+
+    <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+  
+<style>
+.main {
+  grid-area: main;
+  display: grid;
+  grid: 1fr 1fr 1fr 1fr / auto;
+  grid-template-areas: "content content content side";
+}
+.header {
+  grid-area: header;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+.content {
+  grid-area: content;
+}
+.side {
+  grid-area: side;
+}
+.footer {
+  grid-area: footer;
+}
+.grid-layout {
+  width: 100%;
+  /*height: 100%;*/
+  display: grid;
+  grid: 168px 1fr 64px / 1fr 1fr 1fr 1fr;
+  grid-template-areas:  "header header header header"
+                        "content content content side"
+                        "footer footer footer footer";
+  grid-gap: 1em 1em;
+}
+
+@media screen and (max-width: 800px) {
+  .grid-layout {
+      grid-template-columns: 100%;
+      grid-template-areas: "header"
+                           "content"
+                           "footer";
+  }
+  .side {
+    display: none;
+  }
+}
+</style>
+<div class="container">
+  <div class="grid-layout">
+    <header id="header" class="header">
+  <div class="header-info">
+    <a href="/" class="header-logo">Sagittaruis A*</a>
+    
+    <q class="header-summary col-sm-5 col-xs-10">fuck →you ↑you ↗you ↓you ↙you and ↩ you</q>
+    
+  </div>
+  <div class="header-nav">
+  
+    <a href="/">Index</a>
+    <span class="fa fa-angle-right"></span>
+    <a href="/p/what-does-the-yield-keyword-do-in-python">What does the “yield” keyword do in Python?</a>
+  
+  </div>
+</header>
+    
+<!-- <div class="main"> -->
+  <div class="article content">
+    <div class="article-header">
+      <div class="article-tags">
+      
+        <a class="cat">python</a>
+      
+        <a class="cat">yield</a>
+      
+      </div>
+    </div>
+    <article id="article" class="article-content"><h2><a href="http://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do-in-python">What does the “yield” keyword do in Python?</a></h2>
+<p>To understand what yield does, you must understand what generators are. And before generators come iterables.</p>
+<h3>Iterables</h3>
+<p>When you create a list, you can read its items one by one. Reading its items one by one is called iteration:</p>
+<pre><code class="lang-python">&gt;&gt;&gt; mylist = [1, 2, 3]
+&gt;&gt;&gt; for i in mylist:
+...    print(i)
+1
+2
+3
+</code></pre>
+<p>mylist is an iterable. When you use a list comprehension, you create a list, and so an iterable:</p>
+<pre><code class="lang-python">&gt;&gt;&gt; mylist = [x*x for x in range(3)]
+&gt;&gt;&gt; for i in mylist:
+...    print(i)
+0
+1
+4
+</code></pre>
+<p>Everything you can use "for... in..." on is an iterable; lists, strings, files...</p>
+<p>These iterables are handy because you can read them as much as you wish, but you store all the values in memory and this is not always what you want when you have a lot of values.</p>
+<h3>Generators</h3>
+<p>Generators are iterators, but you can only iterate over them once. It's because they do not store all the values in memory, they generate the values on the fly:</p>
+<pre><code class="lang-python">&gt;&gt;&gt; mygenerator = (x*x for x in range(3))
+&gt;&gt;&gt; for i in mygenerator:
+...    print(i)
+0
+1
+4
+</code></pre>
+<p>It is just the same except you used () instead of []. BUT, you cannot perform for i in mygenerator a second time since generators can only be used once: they calculate 0, then forget about it and calculate 1, and end calculating 4, one by one.</p>
+<h3>Yield</h3>
+<p>yield is a keyword that is used like return, except the function will return a generator.</p>
+<pre><code class="lang-python">&gt;&gt;&gt; def createGenerator():
+...    mylist = range(3)
+...    for i in mylist:
+...        yield i*i
+...
+&gt;&gt;&gt; mygenerator = createGenerator() # create a generator
+&gt;&gt;&gt; print(mygenerator) # mygenerator is an object!
+&lt;generator object createGenerator at 0xb7555c34&gt;
+&gt;&gt;&gt; for i in mygenerator:
+...     print(i)
+0
+1
+4
+</code></pre>
+<p>Here it's a useless example, but it's handy when you know your function will return a huge set of values that you will only need to read once.</p>
+<p>To master <code>yield</code>, you must understand that <strong>when you call the function, the code you have written in the function body does not run.</strong> The function only returns the generator object, this is a bit tricky :-)</p>
+<p>Then, your code will be run each time the for uses the generator.</p>
+<p>Now the hard part:</p>
+<p>The first time the for calls the generator object created from your function, it will run the code in your function from the beginning until it hits yield, then it'll return the first value of the loop. Then, each other call will run the loop you have written in the function one more time, and return the next value, until there is no value to return.</p>
+<p>The generator is considered empty once the function runs but does not hit yield anymore. It can be because the loop had come to an end, or because you do not satisfy an "if/else" anymore.</p>
+<h3>Your code explained</h3>
+<p>Generator:</p>
+<pre><code class="lang-python"># Here you create the method of the node object that will return the generator
+def node._get_child_candidates(self, distance, min_dist, max_dist):
+
+  # Here is the code that will be called each time you use the generator object:
+
+  # If there is still a child of the node object on its left
+  # AND if distance is ok, return the next child
+  if self._leftchild and distance - max_dist &lt; self._median:
+      yield self._leftchild
+
+  # If there is still a child of the node object on its right
+  # AND if distance is ok, return the next child
+  if self._rightchild and distance + max_dist &gt;= self._median:
+      yield self._rightchild
+
+  # If the function arrives here, the generator will be considered empty
+  # there is no more than two values: the left and the right children
+</code></pre>
+<p>Caller:</p>
+<pre><code class="lang-python">
+# Create an empty list and a list with the current object reference
+result, candidates = list(), [self]
+
+# Loop on candidates (they contain only one element at the beginning)
+while candidates:
+
+    # Get the last candidate and remove it from the list
+    node = candidates.pop()
+
+    # Get the distance between obj and the candidate
+    distance = node._get_dist(obj)
+
+    # If distance is ok, then you can fill the result
+    if distance &lt;= max_dist and distance &gt;= min_dist:
+        result.extend(node._values)
+
+    # Add the children of the candidate in the candidates list
+    # so the loop will keep running until it will have looked
+    # at all the children of the children of the children, etc. of the candidate
+    candidates.extend(node._get_child_candidates(distance, min_dist, max_dist))
+
+return result
+</code></pre>
+<p>This code contains several smart parts:</p>
+<ul>
+<li>The loop iterates on a list but the list expands while the loop is being iterated :-) It's a concise way to go through all these nested data even if it's a bit dangerous since you can end up with an infinite loop. In this case, candidates.extend(node._get_child_candidates(distance, min_dist, max_dist)) exhausts all the values of the generator, but while keeps creating new generator objects which will produce different values from the previous ones since it's not applied on the same node.</li>
+<li>The extend() method is a list object method that expects an iterable and adds its values to the list.
+Usually we pass a list to it:<pre><code class="lang-python">&gt;&gt;&gt; a = [1, 2]
+&gt;&gt;&gt; b = [3, 4]
+&gt;&gt;&gt; a.extend(b)
+&gt;&gt;&gt; print(a)
+[1, 2, 3, 4]
+</code></pre>
+</li>
+</ul>
+<p>But in your code it gets a generator, which is good because:</p>
+<ol>
+<li>You don't need to read the values twice.</li>
+<li>You may have a lot of children and you don't want them all stored in memory.</li>
+</ol>
+<p>And it works because Python does not care if the argument of a method is a list or not. Python expects iterables so it will work with strings, lists, tuples and generators! This is called duck typing and is one of the reason why Python is so cool. But this is another story, for another question...</p>
+<p>You can stop here, or read a little bit to see an advanced use of a generator:</p>
+<h3>Controlling a generator exhaustion</h3>
+<pre><code class="lang-python">&gt;&gt;&gt; class Bank(): # let&#39;s create a bank, building ATMs
+...    crisis = False
+...    def create_atm(self):
+...        while not self.crisis:
+...            yield &quot;$100&quot;
+&gt;&gt;&gt; hsbc = Bank() # when everything&#39;s ok the ATM gives you as much as you want
+&gt;&gt;&gt; corner_street_atm = hsbc.create_atm()
+&gt;&gt;&gt; print(corner_street_atm.next())
+$100
+&gt;&gt;&gt; print(corner_street_atm.next())
+$100
+&gt;&gt;&gt; print([corner_street_atm.next() for cash in range(5)])
+[&#39;$100&#39;, &#39;$100&#39;, &#39;$100&#39;, &#39;$100&#39;, &#39;$100&#39;]
+&gt;&gt;&gt; hsbc.crisis = True # crisis is coming, no more money!
+&gt;&gt;&gt; print(corner_street_atm.next())
+&lt;type &#39;exceptions.StopIteration&#39;&gt;
+&gt;&gt;&gt; wall_street_atm = hsbc.create_atm() # it&#39;s even true for new ATMs
+&gt;&gt;&gt; print(wall_street_atm.next())
+&lt;type &#39;exceptions.StopIteration&#39;&gt;
+&gt;&gt;&gt; hsbc.crisis = False # trouble is, even post-crisis the ATM remains empty
+&gt;&gt;&gt; print(corner_street_atm.next())
+&lt;type &#39;exceptions.StopIteration&#39;&gt;
+&gt;&gt;&gt; brand_new_atm = hsbc.create_atm() # build a new one to get back in business
+&gt;&gt;&gt; for cash in brand_new_atm:
+...    print cash
+$100
+$100
+$100
+$100
+$100
+$100
+$100
+$100
+$100
+...
+</code></pre>
+<p>It can be useful for various things like controlling access to a resource.</p>
+<h3>Itertools, your best friend</h3>
+<p>The itertools module contains special functions to manipulate iterables. Ever wish to duplicate a generator? Chain two generators? Group values in a nested list with a one liner? Map / Zip without creating another list?</p>
+<p>Then just import itertools.</p>
+<p>An example? Let's see the possible orders of arrival for a 4 horse race:</p>
+<pre><code class="lang-python">&gt;&gt;&gt; horses = [1, 2, 3, 4]
+&gt;&gt;&gt; races = itertools.permutations(horses)
+&gt;&gt;&gt; print(races)
+&lt;itertools.permutations object at 0xb754f1dc&gt;
+&gt;&gt;&gt; print(list(itertools.permutations(horses)))
+[(1, 2, 3, 4),
+ (1, 2, 4, 3),
+ (1, 3, 2, 4),
+ (1, 3, 4, 2),
+ (1, 4, 2, 3),
+ (1, 4, 3, 2),
+ (2, 1, 3, 4),
+ (2, 1, 4, 3),
+ (2, 3, 1, 4),
+ (2, 3, 4, 1),
+ (2, 4, 1, 3),
+ (2, 4, 3, 1),
+ (3, 1, 2, 4),
+ (3, 1, 4, 2),
+ (3, 2, 1, 4),
+ (3, 2, 4, 1),
+ (3, 4, 1, 2),
+ (3, 4, 2, 1),
+ (4, 1, 2, 3),
+ (4, 1, 3, 2),
+ (4, 2, 1, 3),
+ (4, 2, 3, 1),
+ (4, 3, 1, 2),
+ (4, 3, 2, 1)]
+</code></pre>
+<p>Understanding the inner mechanisms of iteration</p>
+<p>Iteration is a process implying iterables (implementing the <code>__iter__()</code> method) and iterators (implementing the <code>__next__()</code> method). Iterables are any objects you can get an iterator from. Iterators are objects that let you iterate on iterables.</p>
+<p>More about it in this article about how does the for loop work.</p>
+<hr>
+</article>
+  </div>
+
+  <div class="side"><nav id="toc"></nav></div>
+<!-- </div> -->
+
+    <footer class="footer">
+  <div class="external-links">
+  
+    <a href="https://github.com/luxrck" class="external-link" title="github"><i class="fa fa-github"></i></a>
+  
+  </div>
+</footer>
+  </div>
+</div>
+
+  <link rel="stylesheet" type="text/css" href="/assets/theme/app.css" />
+  <script>
+  hljs.initHighlightingOnLoad();
+
+  var categories = {"name": "all", "rank": 3, "sub": [{"name": "stackoverflow", "rank": 2, "sub": []}, {"name": "debug", "rank": 1, "sub": []}]};
+  var tags = [{"name": "python", "rank": 2}, {"name": "decorator", "rank": 1}, {"name": "gevent", "rank": 1}, {"name": "ssl", "rank": 1}, {"name": "yield", "rank": 1}];
+
+  var tag = undefined;
+  var category = undefined;
+  var article  = {"categories": ["all", "stackoverflow"], "date": "2017-04-18 13:42", "name": "what-does-the-yield-keyword-do-in-python", "tags": ["python", "yield"], "time": 1492494120, "title": "What does the \u201cyield\u201d keyword do in Python?"};
+  </script>
+  
+<link rel="stylesheet" type="text/css" href="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.css" />
+<script src="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.js"></script>
+
+<style>
+.affix {
+  top: 0px;
+}
+
+.article-header {
+  margin-bottom: 1em;
+}
+</style>
+
+<script>
+$(function() {
+  var navSelector = '#toc';
+  var $myNav = $(navSelector);
+  Toc.init($myNav);
+  $('body').scrollspy({
+    target: navSelector
+    });
+
+  // FIXME: this won't working on android chrome, why ?
+  $myNav.affix({
+   offset: {
+     top: $myNav.offset().top,
+     }
+   });
+
+  // $(window).on("scroll", function(e) {
+  //   var e = $("#toc li.active").get(0);
+  //   if (e) {
+  //     e.scrollIntoView(false);
+  //   }
+  //   });
+});
+</script>
+
+  
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-99130329-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>
