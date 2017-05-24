@@ -1,7 +1,7 @@
 ---
-title: gevent与requests混用时出现的ssl无限递归错误
+title: gevent的SSL无限递归错误
 date: 2017-05-15 16:35
-category: debug
+category:
 tags: gevent, ssl
 ---
 
@@ -91,7 +91,7 @@ except ImportError:
 import ssl
 SSLContext = lambda *args, **kw: ssl.SSLContext(*args, **kw)
 ```
-当然最好的方式还是在引入`gevent`库后立即执行`monkey patch`代码。
+当然最好的方案还是在引入`gevent`库后立即执行`monkey patch`代码。
 
 
 ### analysis

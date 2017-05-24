@@ -9,8 +9,10 @@
     <link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Pacifico' />
     <link rel='stylesheet' type='text/css' href="//fonts.googleapis.com/css?family=Orbitron" />
 
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/solarized-dark.min.css" />
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/{{ config.theme.highlight }}.min.css" />
     <script src="/assets/theme/highlight.pack.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
     <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
     <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />

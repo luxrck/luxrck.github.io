@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>令我吃惊的代码片段</title>
+    <script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+
+    <link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Pacifico' />
+    <link rel='stylesheet' type='text/css' href="//fonts.googleapis.com/css?family=Orbitron" />
+
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/solarized-dark.min.css" />
+    <script src="/assets/theme/highlight.pack.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type='text/css' href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+  
+<style>
+.main {
+  grid-area: main;
+  display: grid;
+  grid: 1fr 1fr 1fr 1fr / auto;
+  grid-template-areas: "content content content side";
+}
+.header {
+  grid-area: header;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+.content {
+  grid-area: content;
+}
+.side {
+  grid-area: side;
+}
+.footer {
+  grid-area: footer;
+}
+.grid-layout {
+  width: 100%;
+  /*height: 100%;*/
+  display: grid;
+  grid: 168px 1fr 64px / 1fr 1fr 1fr 1fr;
+  grid-template-areas:  "header header header header"
+                        "content content content side"
+                        "footer footer footer footer";
+  grid-gap: 1em 1em;
+}
+
+@media screen and (max-width: 800px) {
+  .grid-layout {
+      grid-template-columns: 100%;
+      grid-template-areas: "header"
+                           "content"
+                           "footer";
+  }
+  .side {
+    display: none;
+  }
+}
+</style>
+<div class="container">
+  <div class="grid-layout">
+    <header id="header" class="header">
+  <div class="header-info">
+    <a href="/" class="header-logo">Sagittaruis A*</a>
+    
+    <q class="header-summary col-sm-5 col-xs-10">fuck →you ↑you ↗you ↓you ↙you and ↩ you</q>
+    
+  </div>
+  <div class="header-nav">
+  
+    <a href="/">Index</a>
+    <span class="fa fa-angle-right"></span>
+    <a href="/p/interesting-code-snippet">令我吃惊的代码片段</a>
+  
+  </div>
+</header>
+    
+<!-- <div class="main"> -->
+  <div class="article content">
+    <div class="article-header">
+      <div class="article-tags">
+      
+      </div>
+    </div>
+    <article id="article" class="article-content"><h5><a href="/assets/论程序底层优化的一些方法与技巧.pdf">abs</a></h5>
+<p>\[
+  abs(a) = \begin{cases}
+    \sim a + 1 = \sim (a-1) &amp; a \lt 0 \\
+    a &amp; a \ge 0
+  \end{cases}
+\]</p>
+<pre><code class="lang-c">int32_t abs(int32_t x) {
+    int32_t y = x &gt;&gt; 31;
+    return (x+y) ^ y;
+}
+</code></pre>
+<h5><a href="https://news.ycombinator.com/item?id=9697008">add</a></h5>
+<p>\[ a + b \Leftrightarrow (a \verb| ^ | b) + (a \verb| &amp; | b) \ll 1 \]</p>
+<pre><code class="lang-c">// eg: 1101 + 1011
+//               1 1 0 1    (13)
+//             + 1 0 1 1    (11)
+// -----------------------
+//               0 1 1 0
+//           + 1 0 0 1
+// -----------------------
+//             1 0 1 0 0
+//         + 0 0 0 1 0
+// -----------------------
+//           0 1 0 0 0 0
+//       + 0 0 0 1 0 0
+// -----------------------
+//         0 0 1 1 0 0 0    (24)
+
+int32_t add(int32_t x, int32_t y) {
+    while (y) {
+        int32_t t = x ^ y;
+        y = (x &amp; y) &lt;&lt; 1;
+        x = t;
+    }
+    return x;
+}
+</code></pre>
+<h5><a href="/assets/论程序底层优化的一些方法与技巧.pdf">average</a></h5>
+<pre><code class="lang-c">// (a + b) / 2 == ((a ^ b) + (a &amp; b) &lt;&lt; 1) / 2
+//             == ((a ^ b) + (a &amp; b) &lt;&lt; 1) &gt;&gt; 1
+//             == (a ^ b) &gt;&gt; 1 + (a &amp; b)
+int32_t average(int32_t x, int32_t y) {
+    return (x&amp;y) + ((x^y) &gt;&gt; 1);
+}
+</code></pre>
+<h5><a href="https://leetcode.com/problems/sum-of-two-integers/">invSqrt</a></h5>
+<pre><code class="lang-c">float invSqrt( float number )
+{
+    long i;
+    float x2, y;
+    const float threehalfs = 1.5F;
+
+    x2 = number * 0.5F;
+    y  = number;
+    i  = * ( long * ) &amp;y;                       // evil floating point bit level hacking
+    i  = 0x5f3759df - ( i &gt;&gt; 1 );               // what the fuck?
+    y  = * ( float * ) &amp;i;
+    y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
+//  y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
+
+    return y;
+}
+</code></pre>
+<h5><a href="/assets/论程序底层优化的一些方法与技巧.pdf">max</a></h5>
+<pre><code class="lang-c">int32_t max(int32_t x, int32_t y) {
+    int32_t m = (x-y) &gt;&gt; 31;
+    return y &amp; m | x &amp; ~m;
+}
+</code></pre>
+<h5><a href="https://en.wikipedia.org/wiki/Fast_inverse_square_root">reverseBinaryTree</a></h5>
+<pre><code class="lang-c">struct NormalNode {
+  int value;
+  struct NormalNode *left;
+  struct NormalNode *right;
+};
+
+struct ReversedNode {
+  int value;
+  struct ReversedNode *right;
+  struct ReversedNode *left;
+};
+
+struct ReversedNode *reverseBinaryTree(struct NormalNode *root) {
+  return (struct ReversedNode *)root;
+}
+</code></pre>
+</article>
+  </div>
+
+  <div class="side"><nav id="toc"></nav></div>
+<!-- </div> -->
+
+    <footer class="footer">
+  <div class="external-links">
+  
+    <a href="https://github.com/luxrck" class="external-link" title="github"><i class="fa fa-github"></i></a>
+  
+  </div>
+</footer>
+  </div>
+</div>
+
+  <link rel="stylesheet" type="text/css" href="/assets/theme/app.css" />
+  <script>
+  hljs.initHighlightingOnLoad();
+
+  var categories = {"name": "all", "rank": 4, "sub": [{"name": "stackoverflow", "rank": 2, "sub": []}, {"name": "programming", "rank": 1, "sub": []}]};
+  var tags = [{"name": "python", "rank": 2}, {"name": "decorator", "rank": 1}, {"name": "gevent", "rank": 1}, {"name": "ssl", "rank": 1}, {"name": "yield", "rank": 1}];
+
+  var tag = undefined;
+  var category = undefined;
+  var article  = {"categories": ["all", "programming"], "date": "2017-05-24 08:35", "name": "interesting-code-snippet", "tags": [], "time": 1495586100, "title": "\u4ee4\u6211\u5403\u60ca\u7684\u4ee3\u7801\u7247\u6bb5"};
+  </script>
+  
+<link rel="stylesheet" type="text/css" href="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.css" />
+<script src="//cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.js"></script>
+
+<style>
+.affix {
+  top: 0px;
+}
+
+.article-header {
+  margin-bottom: 1em;
+}
+</style>
+
+<script>
+$(function() {
+  var navSelector = '#toc';
+  var $myNav = $(navSelector);
+  Toc.init($myNav);
+  $('body').scrollspy({
+    target: navSelector
+    });
+
+  // FIXME: this won't working on android chrome, why ?
+  $myNav.affix({
+   offset: {
+     top: $myNav.offset().top,
+     }
+   });
+
+  // $(window).on("scroll", function(e) {
+  //   var e = $("#toc li.active").get(0);
+  //   if (e) {
+  //     e.scrollIntoView(false);
+  //   }
+  //   });
+});
+</script>
+
+  
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-99130329-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>

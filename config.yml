@@ -5,6 +5,8 @@ externals:
 home: Sagittarius A*
 output: site
 summary: "fuck \u2192you \u2191you \u2197you \u2193you \u2199you and \u21A9 you"
-theme: default
+theme:
+  name: default
+  highlight: solarized-dark
 ga:
   id: UA-99130329-1
