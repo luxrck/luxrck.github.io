@@ -1,0 +1,190 @@
+</<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Use a simple Neural Network to recognize and classify digit.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" type='text/css' href="bootstrap.min.css" />
+    <style>
+        body {
+            overflow-y: hidden;
+            background: #f0f0f0;
+            justify-content: center;
+        }
+        .header {
+            grid-area: header;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            text-align: center;
+            padding-top: 16px;
+            font-size: 16px;
+        }
+        .content {
+            grid-area: content;
+        }
+        .footer {
+            grid-area: footer;
+            width: 280px;
+        }
+        .preview {
+            grid-area: preview;
+        }
+        .grid-layout {
+            width: 100%;
+            /*height: 100%;*/
+            display: grid;
+            grid: 64px 2fr 100px 28px / 1fr;
+            grid-template-areas:  "header"
+                                  "content"
+                                  "footer"
+                                  "preview";
+            grid-gap: 1em 1em;
+            justify-items: center;
+        }
+
+        canvas {
+            background: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="grid-layout">
+            <div class="header"><p>Draw a digit in below area.</p></div>
+            <canvas class="content" id="drawpad" width="280px" height="280px"></canvas>
+            <div class="footer">
+                <div id="clear" class="btn btn-default btn-md btn-lg btn-block">Clear</div>
+                <div id="process" class="btn btn-primary btn-md btn-lg btn-block">Guess</div>
+            </div>
+            <canvas class="preview" id="imp" width="28px" height="28px"></canvas>
+        </div>
+    </div>
+
+    <script src="jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+
+    <script src="numjs.min.js"></script>
+    <script src="weights.js"></script>
+    <script src="nn.js"></script>
+    <script>
+        init_network();
+        
+        var prevMousePos = {x: -1, y: -1, valid: false};
+        var updateCanvasDrawing = function(x, y) {
+            var ctx = document.querySelector("#drawpad").getContext("2d");
+            if (prevMousePos.valid) {
+                raito = 15.0 / Math.sqrt((x - prevMousePos.x) ** 2 + (y - prevMousePos.y) ** 2);
+                dy = (x - prevMousePos.x) * raito;
+                dx = (prevMousePos.y - y) * raito;
+                ctx.fillColor = "#000000";
+                ctx.beginPath();
+                ctx.moveTo(prevMousePos.x + dx, prevMousePos.y + dy);
+                ctx.lineTo(prevMousePos.x - dx, prevMousePos.y - dy);
+                ctx.lineTo(x - dx, y - dy);
+                ctx.lineTo(x + dx, y + dy);
+                ctx.lineTo(prevMousePos.x + dx, prevMousePos.y + dy);
+                ctx.fill();
+                prevMousePos.x = x; prevMousePos.y = y;
+            }
+            ctx.fillColor = "#000000";
+            ctx.beginPath();
+            ctx.arc(x, y, 15, 0, 2 * Math.PI, true);
+            ctx.fill();
+        };
+        $("#drawpad").on("mousedown", function(e) {
+            if (!prevMousePos.valid) {
+                prevMousePos.valid = true;
+                prevMousePos.x = e.offsetX;
+                prevMousePos.y = e.offsetY;
+            }
+        })
+        $("#drawpad").on("mouseup", function(e) {
+            //console.log(e, prevMousePos);
+            prevMousePos = {x: -1, y: -1, valid: false};
+        })
+        $("body").on("mouseup", function(e) {
+            prevMousePos = {x: -1, y: -1, valid: false};
+        })
+        $("#drawpad").on("mousemove", function(e) {
+            if (e.buttons & 1) {
+                updateCanvasDrawing(e.offsetX, e.offsetY);
+            }
+        });
+
+        $("#drawpad").on("touchstart", function(e) {
+            if (!prevMousePos.valid) {
+                prevMousePos.valid = true;
+                prevMousePos.x = e.offsetX;
+                prevMousePos.y = e.offsetY;
+            }
+        });
+        $("#drawpad").on("touchend", function(e) {
+            prevMousePos = {x: -1, y: -1, valid: false};
+        })
+        $("#drawpad").on("touchmove", function(e) {
+            var touch = e.originalEvent.touches[0];
+            var pos = $("#drawpad").position();
+            updateCanvasDrawing(touch.clientX - pos.left, touch.clientY - pos.top);
+        });
+
+        $("#clear").on("click", function(e) {
+            document.querySelector("#drawpad").getContext("2d").clearRect(0, 0, 280, 280);
+        });
+
+        function resizeImage(img, w, h) {
+            var pixels = [];
+            var blockw = Math.round(img.width / w);
+            var blockh = Math.round(img.height / h);
+            console.log(img, blockw, blockh, w, h)
+            for (r=0; r<img.width; r+=blockh) {
+                var row = [];
+                for (c=0; c<img.height; c+=blockw) {
+                    var total = 0;
+                    for (pr=0; pr<blockh; pr++) {
+                        for (pc=0; pc<blockw; pc++) {
+                            total += (img.data[(r + pr) * img.width * 4 + (c + pc) * 4 + 3] ? 1 : 0);
+                        }
+                    }
+                    if (total <= 5) {
+                        total = 0;
+                    }
+                    row.push( total / (blockh * blockw));
+                }
+                pixels.push(row);
+            }
+            //console.log(pixels.toLocaleString());
+            return pixels;
+        }
+        function previewImage(pixels) {
+            var imp = document.querySelector("#imp").getContext("2d")
+            var idt = imp.getImageData(0,0,28,28);
+            var index = 0;
+            for (r=0; r<pixels.length; r++) {
+                for (c=0; c<pixels[0].length; c++) {
+                    var cell = Math.round(255 * pixels[r][c]);
+                    //idt.data[index+0] = cell;
+                    //idt.data[index+1] = cell;
+                    //idt.data[index+2] = cell;
+                    idt.data[index+3] = cell;
+                    index += 4;
+                }
+            }
+            //console.log("idt:", idt);
+            imp.putImageData(idt, 0, 0);
+        }
+        $("#process").on("click", function(e) {
+            var imgData = document.querySelector("#drawpad")
+                                  .getContext("2d")
+                                  .getImageData(0, 0, 280, 280);
+            var idata = resizeImage(imgData, 28, 28);
+            //console.log(idata);
+            previewImage(idata);
+            window.alert(solve(idata));
+            document.querySelector("#drawpad").getContext("2d").clearRect(0, 0, 280, 280);
+            //document.querySelector("#imp").getContext("2d").clearRect(0, 0, 28, 28);
+        });
+    </script>
+</body>
+</html>
